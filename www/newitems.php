@@ -1,5 +1,7 @@
 <?php
 
+include_once "searchutil.php";
+
 define("NEWITEMS_SITENEWS", 0x0001);
 define("NEWITEMS_GAMES", 0x0002);
 define("NEWITEMS_LISTS", 0x0004);
@@ -112,9 +114,11 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
         // query the recent games
         list($rows, $rowcnt, $sortList, $errMsg, $summaryDesc, $badges,
          $specials, $specialsUsed, $orderBy) =
-        doSearch($db, $term, $searchType, $sortby, $games_limit, $browse);
+         doSearch($db, $term, $searchType, $sortby, $games_limit, $browse);
         $gamecnt = count($rows);
+ //       print_r ($rows);
         foreach ($rows as $row) {
+//            echo $row;
             $items[] = array('G', $row['d'], $row);
         }
     }
