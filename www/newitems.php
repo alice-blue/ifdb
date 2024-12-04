@@ -80,27 +80,27 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
             $items[] = array('S', $row['d'], $row);
         }
     }
-**original section starts here
-    if ($itemTypes & NEWITEMS_GAMES) {
-        $games_limit = $options['games_limit'] ?? $limit;
-        if ($days) $dayWhere = "created > date_sub(now(), interval $days day)";
-        // query the recent games
-        $result = mysql_query(
-            "select id, title, author, `desc`, created as d,
-               date_format(created, '%M %e, %Y') as fmtdate,
-               system, pagevsn,
-               (coverart is not null) as hasart
-             from games
-             where $dayWhere
-             order by created desc
-             limit $games_limit", $db);
-        $gamecnt = mysql_num_rows($result);
-        for ($i = 0 ; $i < $gamecnt ; $i++) {
-            $row = mysql_fetch_array($result, MYSQL_ASSOC);
-            $items[] = array('G', $row['d'], $row);
-        }
-    }
-*** my new replacement section starts here
+// *** original section starts here
+//    if ($itemTypes & NEWITEMS_GAMES) {
+//        $games_limit = $options['games_limit'] ?? $limit;
+//        if ($days) $dayWhere = "created > date_sub(now(), interval $days day)";
+//        // query the recent games
+//        $result = mysql_query(
+//            "select id, title, author, `desc`, created as d,
+//               date_format(created, '%M %e, %Y') as fmtdate,
+//               system, pagevsn,
+//               (coverart is not null) as hasart
+//             from games
+//             where $dayWhere
+//             order by created desc
+//             limit $games_limit", $db);
+//        $gamecnt = mysql_num_rows($result);
+//        for ($i = 0 ; $i < $gamecnt ; $i++) {
+//            $row = mysql_fetch_array($result, MYSQL_ASSOC);
+//            $items[] = array('G', $row['d'], $row);
+//        }
+//    }
+// *** my new replacement section starts here
     if ($itemTypes & NEWITEMS_GAMES) {
         $term = "";
         if ($days) $term = "added:" . $days . "d-";
@@ -114,13 +114,11 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
          $specials, $specialsUsed, $orderBy) =
         doSearch($db, $term, $searchType, $sortby, $games_limit, $browse);
         $gamecnt = count($rows);
-        
-//        for ($i = 0 ; $i < $gamecnt ; $i++) {
-//            $row = mysql_fetch_array($result, MYSQL_ASSOC);
-//            $items[] = array('G', $row['d'], $row);
+        foreach ($rows as $row) {
+            $items[] = array('G', $row['d'], $row);
         }
     }
-*** new section ends here
+// *** new section ends here
     if ($itemTypes & NEWITEMS_LISTS) {
         $lists_limit = $options['lists_limit'] ?? $limit;
         if ($days) $dayWhere = "reclists.createdate > date_sub(now(), interval $days day)";
