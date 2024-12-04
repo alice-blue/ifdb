@@ -80,7 +80,7 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
             $items[] = array('S', $row['d'], $row);
         }
     }
-
+**original section starts here
     if ($itemTypes & NEWITEMS_GAMES) {
         $games_limit = $options['games_limit'] ?? $limit;
         if ($days) $dayWhere = "created > date_sub(now(), interval $days day)";
@@ -100,7 +100,27 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
             $items[] = array('G', $row['d'], $row);
         }
     }
-
+*** my new replacement section starts here
+    if ($itemTypes & NEWITEMS_GAMES) {
+        $term = "";
+        if ($days) $term = "added:" . $days . "d-";
+        $searchType = "game";
+        $sortby = "lnew";
+        $games_limit = $options['games_limit'] ?? $limit;
+        $browse = 0;        
+        
+        // query the recent games
+        list($rows, $rowcnt, $sortList, $errMsg, $summaryDesc, $badges,
+         $specials, $specialsUsed, $orderBy) =
+        doSearch($db, $term, $searchType, $sortby, $games_limit, $browse);
+        $gamecnt = count($rows);
+        
+//        for ($i = 0 ; $i < $gamecnt ; $i++) {
+//            $row = mysql_fetch_array($result, MYSQL_ASSOC);
+//            $items[] = array('G', $row['d'], $row);
+        }
+    }
+*** new section ends here
     if ($itemTypes & NEWITEMS_LISTS) {
         $lists_limit = $options['lists_limit'] ?? $limit;
         if ($days) $dayWhere = "reclists.createdate > date_sub(now(), interval $days day)";
