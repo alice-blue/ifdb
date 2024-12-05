@@ -1,5 +1,15 @@
 <div class=headline id='reviews'><h1 class='unset'>Reviews</h1></div>
 <?php
+
+***New stuff starts here
+
+$options = [];
+$options['days'] = 30;
+$itemTypes = NEWITEMS_REVIEWS;
+$items = getNewItems($db, $limit, $itemTypes, $options);
+
+
+***
 // get the latest reviews
 $items = getNewItems($db, 7, NEWITEMS_REVIEWS);
 
