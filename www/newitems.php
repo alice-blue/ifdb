@@ -1,5 +1,7 @@
 <?php
 
+include_once "searchutil.php";
+
 define("NEWITEMS_SITENEWS", 0x0001);
 define("NEWITEMS_GAMES", 0x0002);
 define("NEWITEMS_LISTS", 0x0004);
@@ -166,6 +168,24 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
     }
 
     if ($itemTypes & NEWITEMS_REVIEWS) {
+        // deal with custom game filters
+        $game_filter = "";
+        $gameids_after_filtering = [];
+        $game_filter_where_condition = "";
+        if ($curuser) {
+            $game_filter = mysql_query("select game_filter from users where id='$curuser'", $db);"
+        }
+        if ($game_filter != "") {
+            // Filter all the games
+            list($game_rows_after_filtering, $rowcnt, $sortList, $errMsg, $summaryDesc, $badges, $specials, $specialsUsed, $orderBy) =
+                doSearch($db, $term, $searchType, $sortby, $limit, $browse);
+            // Note the gameids of the remaining games
+            foreach $game_rows_after_filtering as $game_row {
+                $gameids_after_filtering[] = $gameRow[gameid];
+            }
+            $game_filter_where_condition = "and gameid in $gameids_after_filtering";
+         }
+        // prepare to query reviews
         $reviews_limit = $options['reviews_limit'] ?? $limit;
         if ($days) $dayWhere = "greatest(reviews.createdate, ifnull(reviews.embargodate, '0000-00-00')) > date_sub(now(), interval $days day)";
         // query the recent reviews (minus plonks)
@@ -198,6 +218,7 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
                and users.sandbox in $sandbox
                and $dayWhere
                $anp
+               $game_filter_where_condition
              order by d desc, id desc
              limit $reviews_limit", $db);
         $revcnt = mysql_num_rows($result);
