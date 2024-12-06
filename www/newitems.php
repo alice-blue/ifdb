@@ -173,15 +173,19 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
         $gameids_after_filtering = [];
         $game_filter_where_condition = "";
         if ($curuser) {
-            $game_filter = mysql_query("select game_filter from users where id='$curuser'", $db);"
+            $result = mysqli_execute_query($db, "select game_filter from users where id = ?", [$curuser]);
+            if (!$result) throw new Exception("Error: " . mysqli_error($db));
+            [$game_filter] = mysql_fetch_row($result);
+            echo "my filter = $game_filter ";
         }
         if ($game_filter != "") {
             // Filter all the games
             list($game_rows_after_filtering, $rowcnt, $sortList, $errMsg, $summaryDesc, $badges, $specials, $specialsUsed, $orderBy) =
                 doSearch($db, $term, $searchType, $sortby, $limit, $browse);
             // Note the gameids of the remaining games
-            foreach $game_rows_after_filtering as $game_row {
-                $gameids_after_filtering[] = $gameRow[gameid];
+            foreach ($game_rows_after_filtering as $game_row) {
+                echo $game_row['id'];
+                $gameids_after_filtering[] = $game_row['id'];
             }
             $game_filter_where_condition = "and gameid in $gameids_after_filtering";
          }
