@@ -187,13 +187,12 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
                 doSearch($db, $term, $searchType, $sortby, $limit, $browse);
             // Note the gameids of the remaining games
             foreach ($game_rows_after_filtering as $game_row) {
-            //    echo $game_row['id'];
-            //    echo "<br>";
                 $gameids_after_filtering[] = $game_row['id'];
             }
             // Since some of the reviews we fetch may be filtered out, get extra reviews
-            $days = 180;
+            $days = 365;
         } else {
+            // We're not dealing ith a custom filter, so don't get extra reviews
             $reviews_limit_clause = "limit $reviews_limit";
         }
         // prepare to query reviews
