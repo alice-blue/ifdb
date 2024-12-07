@@ -234,8 +234,9 @@ function doSearch($db, $term, $searchType, $sortby, $limit, $browse, $override_g
         $summaryDesc = "Tags";
     }
     else
-    {
-        // special keywords for game search:  "keyword:" => descriptor
+    {   
+        // $searchType is either "game" or "gameid"
+        // special keywords for game and gameid search:  "keyword:" => descriptor
         $specialMap = array(
             "genre:" => array("genre", 0),
             "published:" => array("published", 4),
@@ -266,8 +267,14 @@ function doSearch($db, $term, $searchType, $sortby, $limit, $browse, $override_g
             "format:" => array("/gameformat/", 99));
 
 
-        // SELECT parameters for game queries
-        $selectList = "distinct games.id as id,
+        if ($searchType == "gameid") {
+            // SELECT parameter for gameid queries
+            $selectList = "distinct games.id as id";
+        }
+        else
+        {   
+            // SELECT parameters for game queries
+            $selectList = "distinct games.id as id,
                        games.title as title,
                        games.author as author,
                        games.desc as description,
@@ -916,6 +923,7 @@ function doSearch($db, $term, $searchType, $sortby, $limit, $browse, $override_g
     switch ($searchType)
     {
     case "game":
+    case "gameid":
         if ($browse) {
             $sortList = array(
                 'ratu' => array('starsort desc,',
@@ -1094,7 +1102,7 @@ function doSearch($db, $term, $searchType, $sortby, $limit, $browse, $override_g
     $logging_level = 0;
 
     // in game searches, implicitly match by TUID with an early query
-    if ($searchType == "game" && count($words) == 1 && count($extraJoins) == 0) {
+    if ( ($searchType == "game" || $searchType == "gameid") && count($words) == 1 && count($extraJoins) == 0) {
         $sql = "select games.id as gameid from games where games.id = ?";
         if ($logging_level) {
             error_log($sql);
