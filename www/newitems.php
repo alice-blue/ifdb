@@ -168,10 +168,12 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
     }
 
     if ($itemTypes & NEWITEMS_REVIEWS) {
+        $reviews_limit = $options['reviews_limit'] ?? $limit;
+        $reviews_limit_clause = "limit $reviews_limit";
         // deal with custom game filters
         $game_filter = "";
         $gameids_after_filtering = [];
-        $game_filter_where_condition = "";
+//        $game_filter_where_condition = "";
         if ($curuser) {
             $result = mysqli_execute_query($db, "select game_filter from users where id = ?", [$curuser]);
             if (!$result) throw new Exception("Error: " . mysqli_error($db));
@@ -179,18 +181,22 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
             echo "my filter = $game_filter ";
         }
         if ($game_filter != "") {
-            // Filter all the games
+            // Filter all the games that have at least 1 review
+            $term = "#reviews:1-";
+            $browse = 0;
             list($game_rows_after_filtering, $rowcnt, $sortList, $errMsg, $summaryDesc, $badges, $specials, $specialsUsed, $orderBy) =
                 doSearch($db, $term, $searchType, $sortby, $limit, $browse);
             // Note the gameids of the remaining games
             foreach ($game_rows_after_filtering as $game_row) {
-                echo $game_row['id'];
+            //    echo $game_row['id'];
+            //    echo "<br>";
                 $gameids_after_filtering[] = $game_row['id'];
             }
-            $game_filter_where_condition = "and gameid in $gameids_after_filtering";
-         }
+            // Since some of the reviews we fetch may be filtered out, get extra reviews
+            $reviews_limit_clause = "";
+            $days = 60;
+        }
         // prepare to query reviews
-        $reviews_limit = $options['reviews_limit'] ?? $limit;
         if ($days) $dayWhere = "greatest(reviews.createdate, ifnull(reviews.embargodate, '0000-00-00')) > date_sub(now(), interval $days day)";
         // query the recent reviews (minus plonks)
         $anp = str_replace('#USERID#', 'reviews.userid', $andNotPlonked);
@@ -222,14 +228,28 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
                and users.sandbox in $sandbox
                and $dayWhere
                $anp
-               $game_filter_where_condition
              order by d desc, id desc
-             limit $reviews_limit", $db);
+             $reviews_limit_clause", $db);
         $revcnt = mysql_num_rows($result);
-        for ($i = 0 ; $i < $revcnt ; $i++) {
-            $row = mysql_fetch_array($result, MYSQL_ASSOC);
-            $items[] = array('R', $row['d'], $row);
+        if ($game_filter != "") {
+            for ($i = 0 ; $i < $revcnt ; $i++) {
+                $row = mysql_fetch_array($result, MYSQL_ASSOC);
+                if (in_array($row['gameid'], $gameids_after_filtering)) {    
+                    $items[] = array('R', $row['d'], $row);
+                    if ( count($items) == $reviews_limit ) {
+                        echo "99 ";
+                        break;
+                    }
+                }
+            }
+        } else {
+            for ($i = 0 ; $i < $revcnt ; $i++) {
+                $row = mysql_fetch_array($result, MYSQL_ASSOC);     
+                $items[] = array('R', $row['d'], $row);
+//            print_r($row);
+            }
         }
+//        print_r($items);
     }
 
     if ($itemTypes & NEWITEMS_COMPS) {
