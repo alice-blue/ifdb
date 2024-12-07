@@ -179,20 +179,23 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
             [$game_filter] = mysql_fetch_row($result);
             echo "my filter = $game_filter ";
         }
-            if ($game_filter != "") {
-            // Filter all the games that have at least 1 review
+        if ($game_filter != "") {
+            // Find games that have at least one review, and use the custom game filter to filter them
             $term = "#reviews:1-";
+            $searchType = "game";
+            $sortby = "lnew";
+            $limit = null;
             $browse = 0;
             list($game_rows_after_filtering, $rowcnt, $sortList, $errMsg, $summaryDesc, $badges, $specials, $specialsUsed, $orderBy) =
                 doSearch($db, $term, $searchType, $sortby, $limit, $browse);
-            // Note the gameids of the remaining games
+            // Note the gameids of the games that we might want to display reviews for
             foreach ($game_rows_after_filtering as $game_row) {
                 $gameids_after_filtering[] = $game_row['id'];
             }
             // Since some of the reviews we fetch may be filtered out, get extra reviews
-            $days = 365;
+//            $days = 365;
         } else {
-            // We're not dealing ith a custom filter, so don't get extra reviews
+            // We're not dealing with a custom filter, so we don't need to get extra reviews
             $reviews_limit_clause = "limit $reviews_limit";
         }
         // prepare to query reviews
