@@ -194,6 +194,7 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [],
                     $gameids_after_filtering[] = $game_row['id'];
                 }
                 $game_filter_was_applied = 1;
+            }
         }
         if (!$game_filter_was_applied) {
             // We're not applying a game filter, so we don't need extra reviews. (We only need extras if some of them might get filtered out.)
@@ -301,7 +302,7 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [],
     usort($items, "sortNewItemsByDate");
 
     // return the item list
-    return ($items, $game_filter_was_applied);
+    return array($items, $game_filter_was_applied);
 }
 
 // sorting callback: sort from newest to oldest
@@ -400,7 +401,7 @@ function showNewItems($db, $first, $last, $items, $options = [])
     $itemTypes = $options['itemTypes'] ?? NEWITEMS_ALLITEMS;
     // if the caller didn't provide the new item lists, query them
     if (!$items)
-        $items = getNewItems($db, $last, $itemTypes, $options);
+        list($items, $game_filter_was_applied) = getNewItems($db, $last, $itemTypes, $options);
 
     // show them
     showNewItemList($db, $first, $last, $items, $options);
@@ -767,7 +768,7 @@ function showNewItemList($db, $first, $last, $items, $options)
 function showNewItemsRSS($db, $showcnt)
 {
     // query the new items
-    $items = getNewItems($db, $showcnt - 1);
+    list($items, $game_filter_was_applied) = getNewItems($db, $showcnt - 1);
     $totcnt = count($items);
 
     $lastBuildDate = false;

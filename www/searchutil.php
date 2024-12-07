@@ -50,7 +50,7 @@ function writeGamesFilteredAnnouncement($page, $sort_order, $search_term) {
         $games_filtered_announcement .= '<a href="search?sortby=' . $sort_order . '&searchfor=' . $search_term . '&nogamefilter=1">search again without the filter</a>.';
     } else if ($page == "browse_games") {
         $games_filtered_announcement .= 'also <a href="search?browse&sortby=' . $sort_order . '&nogamefilter=1">browse without the filter</a>.';
-    } else if ($page == "all_new_reviews" {
+    } else if ($page == "all_new_reviews") {
         $games_filtered_announcement .= 'also <a href="allnew?reviews&nogamefilter=1">browse without the filter</a>.';
     }
     return $games_filtered_announcement;
