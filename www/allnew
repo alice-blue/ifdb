@@ -17,13 +17,14 @@ if ($pg < 1)
     $pg = 1;
 
 $showFlagged = isset($_GET['showFlagged']) && $_GET['showFlagged'];
+$override_game_filter = get_req_data('nogamefilter');
 
 // calculate where that puts us in the results
 $firstOnPage = ($pg - 1) * PER_PAGE;
 $lastOnPage = $firstOnPage + PER_PAGE - 1;
 
 // query the items
-list($items, $game_filter_was_applied) = getNewItems($db, $lastOnPage + 1, $type);
+list($items, $game_filter_was_applied) = getNewItems($db, $lastOnPage + 1, $type, $override_game_filter);
 $tot = count($items);
 
 $params = [];
@@ -54,7 +55,7 @@ echo "<p><hr class=dots><p>$pageCtl<br>\n";
 echo "</div>"; // prerender-moderate
 
 if ($game_filter_was_applied) {
-    $games_filtered_announcement = writeGamesFilteredAnnouncement($all_new_reviews, null, null);
+    $games_filtered_announcement = writeGamesFilteredAnnouncement("all_new_reviews", null, null);
     echo "<p>" . $games_filtered_announcement . "<p>";
 }
 

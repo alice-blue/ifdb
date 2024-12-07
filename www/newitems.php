@@ -176,7 +176,7 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [],
         // deal with custom game filters
         $game_filter = "";
         $gameids_after_filtering = [];
-        if ($curuser && !$override_game_filter) {
+        if ($curuser && $override_game_filter != 1) {
             $result = mysqli_execute_query($db, "select game_filter from users where id = ?", [$curuser]);
             if (!$result) throw new Exception("Error: " . mysqli_error($db));
             [$game_filter] = mysql_fetch_row($result);
