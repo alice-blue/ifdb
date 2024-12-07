@@ -39,6 +39,9 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [],
                          . "and filtertype = 'K') = 0";
     }
 
+    // So far, we have not applied a custom game filter
+    $game_filter_was_applied = 0;
+    
     // Include only reviews from our sandbox or sandbox 0 (all users)
     $sandbox = "(0)";
     if ($curuser)
@@ -190,11 +193,11 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [],
                 foreach ($game_rows_after_filtering as $game_row) {
                     $gameids_after_filtering[] = $game_row['id'];
                 }
-                // Since we are using a custom game filter, we'll need to fetch extra reviews 
-                // in case some get filtered out, so don't use a limit clause for reviews.
+                $game_filter_was_applied = 1;
         }
-        if (game_filter == "") {
-            // We're not using a custom filter, so we don't need extra reviews. We can use a limit clause for reviews.
+        if (!$game_filter_was_applied) {
+            // We're not applying a game filter, so we don't need extra reviews. (We only need extras if some of them might get filtered out.)
+            // That means we can use a limit clause for reviews.
             $reviews_limit_clause = "limit $reviews_limit";
         }
         // prepare to query reviews
@@ -298,7 +301,7 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [],
     usort($items, "sortNewItemsByDate");
 
     // return the item list
-    return $items;
+    return ($items, $game_filter_was_applied);
 }
 
 // sorting callback: sort from newest to oldest
