@@ -22,7 +22,7 @@ define("NEWITEMS_ALLITEMS",
     | NEWITEMS_COMPNEWS
 );
 
-function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
+function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [], $override_game_filter = 0)
 {
     $days = $options['days'] ?? null;
 
@@ -173,29 +173,28 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
         // deal with custom game filters
         $game_filter = "";
         $gameids_after_filtering = [];
-        if ($curuser) {
+        if ($curuser && !$override_game_filter) {
             $result = mysqli_execute_query($db, "select game_filter from users where id = ?", [$curuser]);
             if (!$result) throw new Exception("Error: " . mysqli_error($db));
             [$game_filter] = mysql_fetch_row($result);
+            if ($game_filter != "") {
+                // Find games that have at least one review, and use the custom game filter to filter them
+                $term = "#reviews:1-";
+                $searchType = "game";
+                $sortby = "lnew";
+                $limit = null;
+                $browse = 0;
+                list($game_rows_after_filtering, $rowcnt, $sortList, $errMsg, $summaryDesc, $badges, $specials, $specialsUsed, $orderBy) =
+                    doSearch($db, $term, $searchType, $sortby, $limit, $browse);
+                // Note the gameids of games that we might want to display reviews for
+                foreach ($game_rows_after_filtering as $game_row) {
+                    $gameids_after_filtering[] = $game_row['id'];
+                }
+                // Since we are using a custom game filter, we'll need to fetch extra reviews 
+                // in case some get filtered out, so don't use a limit clause for reviews.
         }
-        if ($game_filter != "") {
-            // Find games that have at least one review, and use the custom game filter to filter them
-            $term = "#reviews:1-";
-            $searchType = "game";
-            $sortby = "lnew";
-            $limit = null;
-            $browse = 0;
-            list($game_rows_after_filtering, $rowcnt, $sortList, $errMsg, $summaryDesc, $badges, $specials, $specialsUsed, $orderBy) =
-                doSearch($db, $term, $searchType, $sortby, $limit, $browse);
-            // Note the gameids of games that we might want to display reviews for
-            foreach ($game_rows_after_filtering as $game_row) {
-                $gameids_after_filtering[] = $game_row['id'];
-            }
-            // Since we are using a custom game filter, we'll need to fetch extra reviews 
-            // in case some get filtered out. Don't use a limit clause for reviews.
-        } else {
-            // We're not using a custom filter, so we don't need extra reviews.
-            // We can use a limit clause for reviews.
+        if (game_filter == "") {
+            // We're not using a custom filter, so we don't need extra reviews. We can use a limit clause for reviews.
             $reviews_limit_clause = "limit $reviews_limit";
         }
         // prepare to query reviews
