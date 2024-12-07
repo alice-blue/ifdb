@@ -53,6 +53,9 @@ showNewItems($db, $firstOnPage, $lastOnPage, $items, ['showFlagged' => $showFlag
 echo "<p><hr class=dots><p>$pageCtl<br>\n";
 echo "</div>"; // prerender-moderate
 
+$games_filtered_announcement = writeGamesFilteredAnnouncement($all_new_reviews, null, null);
+echo "<p>" . $games_filtered_announcement . "<p>";
+
 // end the page
 pageFooter();
 
