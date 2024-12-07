@@ -177,7 +177,6 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
             $result = mysqli_execute_query($db, "select game_filter from users where id = ?", [$curuser]);
             if (!$result) throw new Exception("Error: " . mysqli_error($db));
             [$game_filter] = mysql_fetch_row($result);
-            echo "my filter = $game_filter ";
         }
         if ($game_filter != "") {
             // Find games that have at least one review, and use the custom game filter to filter them
@@ -188,14 +187,15 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
             $browse = 0;
             list($game_rows_after_filtering, $rowcnt, $sortList, $errMsg, $summaryDesc, $badges, $specials, $specialsUsed, $orderBy) =
                 doSearch($db, $term, $searchType, $sortby, $limit, $browse);
-            // Note the gameids of the games that we might want to display reviews for
+            // Note the gameids of games that we might want to display reviews for
             foreach ($game_rows_after_filtering as $game_row) {
                 $gameids_after_filtering[] = $game_row['id'];
             }
-            // Since some of the reviews we fetch may be filtered out, get extra reviews
-//            $days = 365;
+            // Since we are using a custom game filter, we'll need to fetch extra reviews 
+            // in case some get filtered out. Don't use a limit clause for reviews.
         } else {
-            // We're not dealing with a custom filter, so we don't need to get extra reviews
+            // We're not using a custom filter, so we don't need extra reviews.
+            // We can use a limit clause for reviews.
             $reviews_limit_clause = "limit $reviews_limit";
         }
         // prepare to query reviews
@@ -236,6 +236,8 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
         if ($game_filter != "") {
             for ($i = 0 ; $i < $revcnt ; $i++) {
                 $row = mysql_fetch_array($result, MYSQL_ASSOC);
+                // Only add the review to $items if it matches a gameid
+                // in $gameids_after_filtering
                 if (in_array($row['gameid'], $gameids_after_filtering)) {    
                     $items[] = array('R', $row['d'], $row);
                     if ( count($items) == $reviews_limit ) {
