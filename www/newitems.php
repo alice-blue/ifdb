@@ -169,18 +169,17 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
 
     if ($itemTypes & NEWITEMS_REVIEWS) {
         $reviews_limit = $options['reviews_limit'] ?? $limit;
-        $reviews_limit_clause = "limit $reviews_limit";
+        $reviews_limit_clause = "";
         // deal with custom game filters
         $game_filter = "";
         $gameids_after_filtering = [];
-//        $game_filter_where_condition = "";
         if ($curuser) {
             $result = mysqli_execute_query($db, "select game_filter from users where id = ?", [$curuser]);
             if (!$result) throw new Exception("Error: " . mysqli_error($db));
             [$game_filter] = mysql_fetch_row($result);
             echo "my filter = $game_filter ";
         }
-        if ($game_filter != "") {
+            if ($game_filter != "") {
             // Filter all the games that have at least 1 review
             $term = "#reviews:1-";
             $browse = 0;
@@ -193,8 +192,9 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
                 $gameids_after_filtering[] = $game_row['id'];
             }
             // Since some of the reviews we fetch may be filtered out, get extra reviews
-            $reviews_limit_clause = "";
-            $days = 60;
+            $days = 180;
+        } else {
+            $reviews_limit_clause = "limit $reviews_limit";
         }
         // prepare to query reviews
         if ($days) $dayWhere = "greatest(reviews.createdate, ifnull(reviews.embargodate, '0000-00-00')) > date_sub(now(), interval $days day)";
@@ -237,7 +237,6 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
                 if (in_array($row['gameid'], $gameids_after_filtering)) {    
                     $items[] = array('R', $row['d'], $row);
                     if ( count($items) == $reviews_limit ) {
-                        echo "99 ";
                         break;
                     }
                 }
@@ -246,7 +245,6 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [])
             for ($i = 0 ; $i < $revcnt ; $i++) {
                 $row = mysql_fetch_array($result, MYSQL_ASSOC);     
                 $items[] = array('R', $row['d'], $row);
-//            print_r($row);
             }
         }
 //        print_r($items);
