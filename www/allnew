@@ -23,7 +23,7 @@ $firstOnPage = ($pg - 1) * PER_PAGE;
 $lastOnPage = $firstOnPage + PER_PAGE - 1;
 
 // query the items
-$items = getNewItems($db, $lastOnPage + 1, $type);
+list($items, $game_filter_was_applied) = getNewItems($db, $lastOnPage + 1, $type);
 $tot = count($items);
 
 $params = [];
@@ -53,8 +53,10 @@ showNewItems($db, $firstOnPage, $lastOnPage, $items, ['showFlagged' => $showFlag
 echo "<p><hr class=dots><p>$pageCtl<br>\n";
 echo "</div>"; // prerender-moderate
 
-$games_filtered_announcement = writeGamesFilteredAnnouncement($all_new_reviews, null, null);
-echo "<p>" . $games_filtered_announcement . "<p>";
+if ($game_filter_was_applied) {
+    $games_filtered_announcement = writeGamesFilteredAnnouncement($all_new_reviews, null, null);
+    echo "<p>" . $games_filtered_announcement . "<p>";
+}
 
 // end the page
 pageFooter();
