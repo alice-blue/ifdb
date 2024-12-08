@@ -39,6 +39,8 @@ function getNewItems($db, $limit, $itemTypes = NEWITEMS_ALLITEMS, $options = [],
                          . "and filtertype = 'K') = 0";
     }
 
+    $override_game_filter = get_req_data('nogamefilter');
+
     // So far, we have not applied a custom game filter
     $game_filter_was_applied = 0;
     

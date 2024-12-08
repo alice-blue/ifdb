@@ -17,7 +17,7 @@ if ($pg < 1)
     $pg = 1;
 
 $showFlagged = isset($_GET['showFlagged']) && $_GET['showFlagged'];
-$override_game_filter = get_req_data('nogamefilter');
+
 
 // calculate where that puts us in the results
 $firstOnPage = ($pg - 1) * PER_PAGE;
@@ -56,7 +56,7 @@ echo "</div>"; // prerender-moderate
 
 if ($game_filter_was_applied) {
     $games_filtered_announcement = writeGamesFilteredAnnouncement("all_new_reviews", null, null);
-    echo "<p>" . $games_filtered_announcement . "<p>";
+    echo "<p class='details'>" . $games_filtered_announcement . "<p>";
 }
 
 // end the page
