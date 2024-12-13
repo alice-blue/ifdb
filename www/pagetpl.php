@@ -3,7 +3,24 @@
 include_once "csp-nonce.php";
 include_once "util.php";
 include_once "login-persist.php";
-include_once "commentutil.php";
+//include_once "commentutil.php";
+//include_once "dbconnect.php";
+//include_once "login-check.php";
+//include_once "session-start.php";
+//include_once "dbconnect.php";
+//include_once "util.php";
+//include_once "login-persist.php";
+
+
+//$db = dbConnect();
+
+//$uid = checkPersistentLogin();
+//$quid = mysql_real_escape_string($uid, $db);
+
+//$loggedIn = (isset($_SESSION['logged_in']) && $_SESSION['logged_in']);
+//$inbox_count_display = "";
+//***
+//$db = dbConnect();
 
 header("Speculation-Rules: \"/speculation-rules\"");
 
@@ -93,19 +110,20 @@ function pageHeader($title, $focusCtl = false, $extraOnLoad = false,
                 ? $_SESSION['logged_in_as'] : false);
     // add the top bar for a regular window
 
-    //***
+ 
+   //***
     // check the inbox
-//    if ($quid) {
-    if ($isLoggedIn) {
-    list($inbox, $inboxCnt) =
-        queryComments($db, "inbox", $quid, "limit 0, 1", $caughtUpDate, false);
-    $inbox_count_display = "";
-    if ($inboxCnt) {
-        $inbox_count_display = "<style nonce='$nonce'><span class='inbox_count'> ($inboxCnt)</span>";
-        global $nonce;
+    $db = dbConnect();
+
+    $uid = checkPersistentLogin();
+    $quid = mysql_real_escape_string($uid, $db);
+    $inboxCnt = 0;
+    if ($quid) {
+        list($inbox, $inboxCnt) =
+            queryComments($db, "inbox", $quid, "limit 0, 1", $caughtUpDate, false);
     }
-}
-    //***
+
+
 ?>
 
 <div class="topctl">
@@ -129,8 +147,11 @@ function pageHeader($title, $focusCtl = false, $extraOnLoad = false,
                     <li class="<?= ($pagescript === 'editprofile') ? 'page-active':''; ?>"><a id="topbar-edit" href="/editprofile">Settings</a></li>
                     <li class="<?= ($pagescript === 'personal') ? 'page-active':''; ?>"><a id="topbar-personal" href="/personal">My Activity</a></li>
                     <li class="<?= ($pagescript === 'commentlog') ? 'page-active':''; ?>"><a id="topbar-inbox" href="/commentlog?mode=inbox">Inbox
-                    <?php echo "<style nonce='$nonce'>$inbox_count_number</style>" ?>
-                    </a></li>";
+                    <?php
+                    if ($inboxCnt) 
+                        echo ' (' . $inboxCnt . ')';
+                    ?>
+                    </a></li>
                     <li><a id="topbar-logout" class="login-link no-prerender" href="/logout">Log Out</a></li>
                 <?php else : ?>
                     <li><a id="topbar-login" class="login-link" href="/login?dest=home">Log In</a></li>
