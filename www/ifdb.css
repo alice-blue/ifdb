@@ -791,15 +791,6 @@ span.xmlstatmsg {
 }
 
 /*
-We use the "inbox_count" span style in the navigation bar at the top of the page
-to show the number of new messages are in the user's inbox.
-*/
-span.inbox_count {
-    color: red;
-    font-weight: bold;
-}
-
-/*
 We use the "details" class in various places where we display additional
 details about a listing or other item.
 */
