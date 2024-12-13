@@ -3,24 +3,6 @@
 include_once "csp-nonce.php";
 include_once "util.php";
 include_once "login-persist.php";
-//include_once "commentutil.php";
-//include_once "dbconnect.php";
-//include_once "login-check.php";
-//include_once "session-start.php";
-//include_once "dbconnect.php";
-//include_once "util.php";
-//include_once "login-persist.php";
-
-
-//$db = dbConnect();
-
-//$uid = checkPersistentLogin();
-//$quid = mysql_real_escape_string($uid, $db);
-
-//$loggedIn = (isset($_SESSION['logged_in']) && $_SESSION['logged_in']);
-//$inbox_count_display = "";
-//***
-//$db = dbConnect();
 
 header("Speculation-Rules: \"/speculation-rules\"");
 
@@ -110,11 +92,8 @@ function pageHeader($title, $focusCtl = false, $extraOnLoad = false,
                 ? $_SESSION['logged_in_as'] : false);
     // add the top bar for a regular window
 
- 
-   //***
-    // check the inbox
+    // check the inbox so we can display the number of new messages
     $db = dbConnect();
-
     $uid = checkPersistentLogin();
     $quid = mysql_real_escape_string($uid, $db);
     $inboxCnt = 0;
@@ -122,8 +101,6 @@ function pageHeader($title, $focusCtl = false, $extraOnLoad = false,
         list($inbox, $inboxCnt) =
             queryComments($db, "inbox", $quid, "limit 0, 1", $caughtUpDate, false);
     }
-
-
 ?>
 
 <div class="topctl">
@@ -149,7 +126,7 @@ function pageHeader($title, $focusCtl = false, $extraOnLoad = false,
                     <li class="<?= ($pagescript === 'commentlog') ? 'page-active':''; ?>"><a id="topbar-inbox" href="/commentlog?mode=inbox">Inbox
                     <?php
                     if ($inboxCnt) 
-                        echo ' (' . $inboxCnt . ')';
+                        echo " (" . $inboxCnt . ")";
                     ?>
                     </a></li>
                     <li><a id="topbar-logout" class="login-link no-prerender" href="/logout">Log Out</a></li>
