@@ -234,7 +234,7 @@ function errExit($msg)
 }
 
 function varPageHeader($title, $focusCtl, $smallPage,
-                       $extraOnLoad = false, $extraHead = false, $inboxCnt)
+                       $extraOnLoad = false, $extraHead = false)
 {
     if ($smallPage)
         smallPageHeader($title, $focusCtl, $extraOnLoad, $extraHead);
