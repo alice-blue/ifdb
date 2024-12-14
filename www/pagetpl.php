@@ -5,15 +5,7 @@ include_once "util.php";
 include_once "login-persist.php";
 include_once "commentutil.php";
     
-// check the inbox so we can display the number of new messages
-$db = dbConnect();
-$uid = checkPersistentLogin();
-$quid = mysql_real_escape_string($uid, $db);
-$inboxCnt = 0;
-if ($quid) {
-    list($inbox, $inboxCnt) =
-        queryComments($db, "inbox", $quid, "limit 0, 1", $caughtUpDate, false);
-}
+
 
 header("Speculation-Rules: \"/speculation-rules\"");
 
@@ -102,8 +94,6 @@ function pageHeader($title, $focusCtl = false, $extraOnLoad = false,
     $curuser = ((isset($_SESSION['logged_in']) && $_SESSION['logged_in'])
                 ? $_SESSION['logged_in_as'] : false);
     // add the top bar for a regular window
-
-
 ?>
 
 <div class="topctl">
@@ -128,8 +118,18 @@ function pageHeader($title, $focusCtl = false, $extraOnLoad = false,
                     <li class="<?= ($pagescript === 'personal') ? 'page-active':''; ?>"><a id="topbar-personal" href="/personal">My Activity</a></li>
                     <li class="<?= ($pagescript === 'commentlog') ? 'page-active':''; ?>"><a id="topbar-inbox" href="/commentlog?mode=inbox">Inbox
                     <?php
-                    if ($inboxCnt) 
+                    // check the inbox so we can display the number of new messages
+                    $db = dbConnect();
+                    $uid = checkPersistentLogin();
+                    $quid = mysql_real_escape_string($uid, $db);
+                    $inboxCnt = 0;
+                    if ($quid) {
+                        list($inbox, $inboxCnt) =
+                        queryComments($db, "inbox", $quid, "limit 0, 1", $caughtUpDate, false);
+                    }
+                    if ($inboxCnt) { 
                         echo " (" . $inboxCnt . ")";
+                    }
                     ?>
                     </a></li>
                     <li><a id="topbar-logout" class="login-link no-prerender" href="/logout">Log Out</a></li>
@@ -234,7 +234,7 @@ function errExit($msg)
 }
 
 function varPageHeader($title, $focusCtl, $smallPage,
-                       $extraOnLoad = false, $extraHead = false)
+                       $extraOnLoad = false, $extraHead = false, $inboxCnt)
 {
     if ($smallPage)
         smallPageHeader($title, $focusCtl, $extraOnLoad, $extraHead);
