@@ -3,6 +3,17 @@
 include_once "csp-nonce.php";
 include_once "util.php";
 include_once "login-persist.php";
+include_once "commentutil.php";
+    
+// check the inbox so we can display the number of new messages
+$db = dbConnect();
+$uid = checkPersistentLogin();
+$quid = mysql_real_escape_string($uid, $db);
+$inboxCnt = 0;
+if ($quid) {
+    list($inbox, $inboxCnt) =
+        queryComments($db, "inbox", $quid, "limit 0, 1", $caughtUpDate, false);
+}
 
 header("Speculation-Rules: \"/speculation-rules\"");
 
@@ -92,15 +103,7 @@ function pageHeader($title, $focusCtl = false, $extraOnLoad = false,
                 ? $_SESSION['logged_in_as'] : false);
     // add the top bar for a regular window
 
-    // check the inbox so we can display the number of new messages
-    $db = dbConnect();
-    $uid = checkPersistentLogin();
-    $quid = mysql_real_escape_string($uid, $db);
-    $inboxCnt = 0;
-    if ($quid) {
-        list($inbox, $inboxCnt) =
-            queryComments($db, "inbox", $quid, "limit 0, 1", $caughtUpDate, false);
-    }
+
 ?>
 
 <div class="topctl">
