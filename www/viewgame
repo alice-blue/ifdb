@@ -1281,10 +1281,6 @@ if (count($links) == 0 && $dlnotes == "") {
                 $zipstar = " <span class=zipstar>{$z[1]}</span>";
         }
 
-        // build the full type description
-        $typedesc = (($fmtdesc && $typename) ? "$typename: $fmtdesc" :
-                     ($fmtdesc ? $fmtdesc : $typename));
-
         // generate the information
         echo "<li>";
 
@@ -1323,7 +1319,11 @@ if (count($links) == 0 && $dlnotes == "") {
         if ($playOnlineURL && ($onlineInterpreterType !== "HTML" || $compPri)) {
             echo "<div class='details'><a href='$playOnlineURL'>Play Online</a></div>";
         }
-    
+
+        // build the full type description
+        $typedesc = (($fmtdesc && $typename) ? "$typename: $fmtdesc" :
+                     ($fmtdesc ? $fmtdesc : $typename));
+   
         if ($typedesc || $zipnote) {
             echo "<span class=fmtnotes>$typedesc$zipnote</span>";
         }
