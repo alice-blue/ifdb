@@ -732,8 +732,12 @@ if ($geticon) {
             . "<b>External ID:</b> " . htmlspecialcharx($externid) . "<br>"
             . "<b>Format Name:</b> " . htmlspecialcharx($fmtname) . "<br>"
             . "<b>Extensions:</b> " . htmlspecialcharx($fmtext) . "<br>"
-            . "<b>Description:</b> " . $fmtdesc . "<br>"
-            . "<b>Web Site:</b> " . $fmtwebsite . "<br>"
+        if ($fmtclass == "G") {
+            echo "<b>Description:</b> Requires " . $fmtdesc . ".<br>";
+        } else {
+            echo "<b>Description:</b> " . $fmtdesc . "<br>";
+        }
+        echo  "<b>Web Site:</b> " . $fmtwebsite . "<br>"
             . ($fmtclass != ""
                ? "<b>Type:</b> {$fmtclassMap[$fmtclass]}<br>"
                : "")
