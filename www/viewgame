@@ -1259,10 +1259,6 @@ if (count($links) == 0 && $dlnotes == "") {
         if ($fmtos != $fmtosvsn && $fmtosvsn != "")
             $typename .= " ($osvsnname and later)";
 
-        // build the full type description
-        $typedesc = (($fmtdesc && $typename) ? "$typename: $fmtdesc" :
-                     ($fmtdesc ? $fmtdesc : $typename));
-
         // if there's no title, use the base name from the URL as the title
         if ($linktitle == "") {
             $prsurl = parse_url($url);
@@ -1284,6 +1280,10 @@ if (count($links) == 0 && $dlnotes == "") {
             else
                 $zipstar = " <span class=zipstar>{$z[1]}</span>";
         }
+
+        // build the full type description
+        $typedesc = (($fmtdesc && $typename) ? "$typename: $fmtdesc" :
+                     ($fmtdesc ? $fmtdesc : $typename));
 
         // generate the information
         echo "<li>";
