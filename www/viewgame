@@ -1322,20 +1322,20 @@ if (count($links) == 0 && $dlnotes == "") {
             echo $playOnlineMiniLink;
         }
 
-        // If we're linking to a game, expand the format description to include instructions for downloading and running it.
-        if ($fmtclass == 'G') {
+        // If we're linking to a game that needs an interpreter, expand the format 
+        // description to include instructions for downloading and running it.
+        if ($fmtclass == 'G' && $fmtexternID != "tads3web" && $fmtexternID != "hypertextgame") {
             $format_instructions = "";
             if ($playOnlineMiniLink) {
                 // These instructions are following a "play online" mini link, so we can begin with "Or"
-                $format_instructions = "Or";
+                $format_instructions = "Or  <a href=\"$url\">download $linktitle</a>";
             } else {
-                $format_instructions = "To play, you can";
+                $format_instructions = "To play, you can download the file";
             }
-            $format_instructions .= ' <a href=\"$url\">download $linktitle</a>';
             if ($zipnote || $zipstar) {
                 $format_instructions .= ", unzip it,";
             }
-            $format_instructions .= " and run it in " . $fmtdesc . ".";
+            $format_instructions .= " and run the game in " . $fmtdesc . ".";
             $fmtdesc = $format_instructions;
         }
 
