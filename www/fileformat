@@ -653,8 +653,11 @@ if ($geticon) {
                     ?></textarea>
                     <br>
                     <span class=details>
-                       This is displayed in the Download box when a file
-                       of this type is listed.
+                       This is displayed in the External Links box when a file
+                       of this type is listed. Note that the descriptions
+                       for most game formats are only partial descriptions.
+                       When these are displayed in External Links box, 
+                       instructions are added to them.
                     </span>
                  </td>
               </tr>
@@ -837,7 +840,7 @@ if ($geticon) {
 
     $result = mysql_query(
         "select id, externid, fmtname, `desc`, extension,
-           (icon is not null) as icon
+           (icon is not null) as icon, fmtclass
          from filetypes order by fmtname", $db);
     $cnt = mysql_num_rows($result);
     for ($i = 0 ; $i < $cnt ; $i++) {
@@ -847,6 +850,7 @@ if ($geticon) {
         $name = htmlspecialcharx(mysql_result($result, $i, "fmtname"));
         $desc = mysql_result($result, $i, "desc");
         $icon = mysql_result($result, $i, "icon");
+        $formatclass = mysql_result($result, $i, "fmtclass");
 
         echo "<tr><td>";
         if ($icon)
@@ -856,9 +860,12 @@ if ($geticon) {
         echo "</td><td class='fileformat__cell'>"
             . "<a href=\"fileformat?id=$id\">$name</a><br>"
             . "External ID: $extid<br>"
-            . "Extension(s): $exts<br>"
-            . "Description: $desc<br>";
-
+            . "Extension(s): $exts<br>";
+        if ($formatclass == "G" && $extid != "tads3web" && $extid != "hypertextgame") {
+            echo "Description: Requires " . $desc . ".<br>";
+        } else {
+            echo "Description: $desc<br>";
+        }
         echo "</td></tr>";
     }
 
