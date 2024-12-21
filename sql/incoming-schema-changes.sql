@@ -65,22 +65,24 @@ UPDATE filetypes
 SET `desc` = 'an <a href="https://www.ifwiki.org/ADRIFT_interpreters">ADRIFT version 4 interpreter</a>' WHERE fmtname = 'ADRIFT 4';
 
 UPDATE filetypes
-SET `desc` = 'an <a href="https://www.ifwiki.org/AdvSys_Interpreters">AdvSys interpreter</a>' WHERE fmtname = 'AdvSys';
+SET `desc` = 'an <a href="https://www.ifwiki.org/AdvSys_Interpreters">AdvSys interpreter</a>'
+WHERE fmtname = 'AdvSys';
 
 UPDATE filetypes
-SET `desc` = 'a <a href="https://www.ifwiki.org/Glulx_interpreters">Glulx interpreter</a>' WHERE fmtname = 'Glulx/Blorb';
+SET `desc` = 'a <a href="https://www.ifwiki.org/Glulx_interpreters">Glulx interpreter</a>'
+WHERE fmtname = 'Glulx/Blorb';
 
 UPDATE filetypes
 SET `desc` = 'The file is compressed with StuffIt, encoded in BinHex format. Free StuffIt Expanders are available for most systems at <a href="http://www.stuffit.com">www.stuffit.com</a>.'
 WHERE fmtname = 'StuffIt/BinHex';
 
-UPDATE filetypes
-SET `desc` = 'The file iscompressed with StuffIt, encoded in MacBinary format. Free StuffIt Expanders are available for most systems at <a href="http://www.stuffit.com">www.stuffit.com</a>.'
-WHERE fmtname = 'StuffIt/MacBinary';
+--UPDATE filetypes
+--SET `desc` = 'The file is compressed with StuffIt, encoded in MacBinary format. Free StuffIt Expanders are available for most systems at <a href="http://www.stuffit.com">www.stuffit.com</a>.'
+--WHERE fmtname = 'StuffIt/MacBinary';
 
 UPDATE filetypes
-SET `desc` = 'an interpreter program. Refer to the game's documentation for details.'
-WHERE fmtname = `Story File`;
+SET `desc` = "an interpreter program - refer to the game's documentation for details"
+WHERE fmtname = 'Story File';
 
 UPDATE filetypes
 SET `desc` = 'The file is encoded in Macintosh <a hfef="http://en.wikipedia.org/wiki/BinHex">Bin/Hex format</a>.'
@@ -115,5 +117,5 @@ SET `desc` = 'an <a href="https://www.ifwiki.org/ADRIFT_interpreters">ADRIFT ver
 WHERE fmtname = 'ADRIFT 5';
 
 UPDATE filetypes
-SET `desc` = 'SET `desc` = 'an <a href="https://www.ifwiki.org/ADRIFT_interpreters">ADRIFT version 5 interpreter</a>''
+SET `desc` = 'an <a href="https://www.ifwiki.org/ADRIFT_interpreters">ADRIFT version 5 interpreter</a>'
 WHERE fmtname = 'ADRIFT 5/Blorb';
