@@ -75,12 +75,12 @@ SET `desc` = 'The file is compressed with StuffIt, encoded in BinHex format. Fre
 WHERE fmtname = 'StuffIt/BinHex';
 
 UPDATE filetypes
-SET `desc` = 'The file is compressed with StuffIt, encoded in MacBinary format. Free StuffIt Expanders are available for most systems at <a href="http://www.stuffit.com">www.stuffit.com</a>.'
+SET `desc` = 'The file iscompressed with StuffIt, encoded in MacBinary format. Free StuffIt Expanders are available for most systems at <a href="http://www.stuffit.com">www.stuffit.com</a>.'
 WHERE fmtname = 'StuffIt/MacBinary';
 
 UPDATE filetypes
-SET `desc` = 'an interpreter program - refer to the game's documentation for details.'
-WHERE fmtname = 'Story File';
+SET `desc` = 'an interpreter program. Refer to the game's documentation for details.'
+WHERE fmtname = `Story File`;
 
 UPDATE filetypes
 SET `desc` = 'The file is encoded in Macintosh <a hfef="http://en.wikipedia.org/wiki/BinHex">Bin/Hex format</a>.'
