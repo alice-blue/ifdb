@@ -1328,10 +1328,11 @@ if (count($links) == 0 && $dlnotes == "") {
             $format_instructions = "";
             if ($playOnlineMiniLink) {
                 // These instructions are following a "play online" mini link, so we can begin with "Or"
-                $format_instructions = "Or  <a href=\"$url\">download $linktitle</a>";
+                $format_instructions = "Or " ;
             } else {
-                $format_instructions = "To play, you can download the file";
+                $format_instructions = "To play, you can ";
             }
+            $format_instructions .= '<a href=\"$url\">download ' . $linktitle . '</a>';
             if ($zipnote || $zipstar) {
                 $format_instructions .= ", unzip it,";
             }
