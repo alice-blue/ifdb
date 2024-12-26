@@ -1832,6 +1832,173 @@ if (!isEmpty($genre)) {
 
     if ($detailView || $recView) {
 
+        ***
+        $selectList = "distinct games.id as id,
+                       games.title as title,
+                       games.author as author,
+                       games.desc as description,
+                       games.tags as tags,
+                       games.moddate as moddate,
+                       games.system as devsys,
+                       if (time(games.published) = '00:00:00',
+                           date_format(games.published, '%Y'),
+                           date_format(games.published, '%M %e, %Y'))
+                         as pubfmt,
+                       if (time(games.published) = '00:00:00',
+                           date_format(games.published, '%Y'),
+                           date_format(games.published, '%Y-%m-%d'))
+                         as published,
+                       date_format(games.published, '%Y') as pubyear,
+                       (games.coverart is not null) as hasart,
+                       avgRating as avgrating,
+                       numRatingsInAvg as ratingcnt,
+                       stdDevRating as ratingdev,
+                       numRatingsTotal,
+                       numMemberReviews,
+                       starsort,
+                       games.sort_title as sort_title,
+                       games.sort_author as sort_author,
+                       ifnull(games.published, '9999-12-31') as sort_pub,
+                       games.pagevsn,
+                       games.flags";
+        $baseWhere = "";
+        $groupBy = "";
+        $baseOrderBy = "";
+
+ $tableList = "games
+                          left join ".getGameRatingsView($db)." on games.id = gameid";
+
+    // start out the WHERE and HAVING clauses as nothing
+    $where = "";
+    $having = "";
+    $relevance = "";
+    $tagsToMatch = [];
+    $tagsToNegate = [];
+
+
+        case 'authorid':
+                // need to join the gameprofilelinks table to do this query
+                if (!isset($extraJoins[$col])) {
+                    $extraJoins[$col] = true;
+                    $txt = mysql_real_escape_string($txt, $db);
+                    $tableList .= " inner join gameprofilelinks as gpl "
+                                  . "on gpl.gameid = games.id "
+                                  . "and gpl.userid = '$txt'";
+                }
+                break;
+
+          case 'rounded_median_time_in_minutes':
+                // we need to join the gametimes mv table for this query    
+                if (!isset($extraJoins[$col])) {
+                    $extraJoins[$col] = true;
+                    $tableList .= " left outer join gametimes_mv "
+                                  . "on games.id = gametimes_mv.gameid";
+                }
+
+                // Add estimated play time to the select list so we can display it in results
+                $selectList .= ", rounded_median_time_in_minutes";
+
+
+
+            case 'author':
+                // get the names in sorting format
+                $nameList = splitPersonalNameList($txt);
+
+                // look for each name in the list
+                $expr = "(";
+                $or = "";
+                foreach ($nameList as $n) {
+                    // look for this exact name embedded in the author field
+                    $expr .= "$or author like '%"
+                             . mysql_real_escape_string(quoteSqlLike($n), $db)
+                             . "%' ";
+
+                    // get the sorting version of the name - LAST, SUFFIX,
+                    // FIRST, MIDDLE, and split into an array
+                    $nl = array_map("trim", explode(",",
+                        getSortingPersonalName($n)));
+
+                    // if the second element is a suffix, add it back to
+                    // the last name
+                    if (count($nl) > 1 && isNameSuffix($nl[1])) {
+                        $nl[0] .= ", {$nl[1]}";
+                        $nl = array_splice($nl, 1, 1);
+                    }
+
+                    // now look for <first initial>% <last name>
+                    if (count($nl) >= 2) {
+                        $expr .= " or author rlike '[[:<:]]"
+                                 . mysql_real_escape_string(
+                                     quoteSqlRLike($nl[1][0]), $db)
+                                 . ".*[[:space:]]+"
+                                 . mysql_real_escape_string(
+                                     quoteSqlRLike($nl[0]), $db)
+                                     . "[[:>:]]'";
+                    }
+
+                    // join the next round with OR
+                    $or = " or";
+                }
+                $expr .= ")";
+                break;
+
+            case 'language':
+                // If it's a three-letter code, look up the two-letter
+                // equivalent; if it's a two-letter code, look up all
+                // three-letter equivalents; if it's longer, look up
+                // the two- and three-letter codes by name
+                $qtxt = mysql_real_escape_string($txt, $db);
+                if (strlen($txt) == 0) {
+                    $expr = "(language = '' or language is null)";
+                } else {
+                    if (strlen($txt) == 2)
+                        $sql = "select id3 from iso639x where id2='$qtxt'";
+                    else if (strlen($txt) == 3)
+                        $sql = "select id2 from iso639x where id3='$qtxt'";
+                    else if (strlen($txt) > 0) {
+                        $qtxt = mysql_real_escape_string(
+                            quoteSqlLike($txt), $db);
+                        $sql =
+                            "select id2 from iso639x where name like '%$qtxt%'
+                             union
+                             select id3 from iso639x where name like '%$qtxt%'";
+                    }
+
+                    $result = mysql_query($sql, $db);
+
+                    // build the expression - match the original string or any
+                    // of the results
+                    $qtxt = mysql_real_escape_string(quoteSqlLike($txt), $db);
+                    $expr = "(language rlike '(^|[, ]){$qtxt}[[:>:]]'";
+                    for ($i = 0 ; $i < mysql_num_rows($result) ; $i++) {
+                        list($cl) = mysql_fetch_row($result);
+                        if ($cl)
+                            $expr .= " or language rlike '(^|[, ]){$cl}[[:>:]]'";
+                    }
+                    $expr .= ")";
+                }
+                break;
+
+   // build the SELECT statement
+    $sql = "select sql_calc_found_rows
+              $selectList
+              $relevance
+            from
+              $tableList
+              $tagsJoin
+            where
+              $where
+              $baseWhere
+            $groupBy
+            $having
+            order by
+              $orderBy
+              $baseOrderBy
+            $limit";
+
+
+***
+        
         // Check for cross-recommendations.  There are two forms
         // of recommendation we generate: Recommend Lists that mention
         // this game, and other games that were highly rated by people
