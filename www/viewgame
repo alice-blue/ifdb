@@ -2996,9 +2996,9 @@ if (count($inrefs) != 0 && !$historyView) {
    // Get tags for the current game
 
    //***
+   $tags_for_current_game = [];
    $result = mysqli_execute_query($db,
        "select distinct tag from gametags where gameid = ?", [$id]);
-    $tags_for_current_game = [];
     while ([$tag] = mysql_fetch_row($result)) {
         $tags_for_current_game[] = $tag;
     }
@@ -3007,12 +3007,18 @@ if (count($inrefs) != 0 && !$historyView) {
         echo "<br><br>TAG: $t";
     }
 
-   $result = mysqli_execute_query($db,
+
+
+
+
+
+
+    $found_games = [];
+    $result = mysqli_execute_query($db,
             "select distinct games.id as gameid,
                 games.author as author,
                 games.genre as genre,
                 games.tags as tags
-
             from
                 games
                 limit 10");
@@ -3028,7 +3034,6 @@ if (count($inrefs) != 0 && !$historyView) {
 //                        on games.id = gametimes_mv.gameid
 
 if (!$result) throw new Exception("Error: " . mysqli_error($db));
-$found_games = [];
 while ([$found_gameid, $found_author, $found_genre, $found_tags] = mysql_fetch_row($result)) {
     $found_game = [];
     $found_game["gameid"] = $found_gameid;
@@ -3036,13 +3041,12 @@ while ([$found_gameid, $found_author, $found_genre, $found_tags] = mysql_fetch_r
     $found_game["genre"] = $found_genre;
     $found_game["tags"] = $found_tags;
     $found_games[] = $found_game;
-    
-//    = $found_game;
+
 }
+echo "<br><br>FOUUUUUUND GAMES: ";
+var_dump($found_games);
 
 $game_matches = [];
-$numgames=0;
-$maxgames=10;
 
 foreach ($found_games as $fg) {
     echo "<br><br>FOUND GAME: " . print_r($fg);
