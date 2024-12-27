@@ -3064,7 +3064,7 @@ echo "<br><br>";
             echo "<br>G is $g<br>";
         }
     }
-    $found_tags_array = explode (",", $found_tags);
+    $found_tags_array = explode (",", $found_tags_string);
 //    echo "<br><br>FOUND GAME: " . $found_game["gameid"];
 //    echo "<br><br>found game tags is " . $found_game["tags"];
 //    echo "<br><br>GENRE FOR CUR GAME IS $genre";
