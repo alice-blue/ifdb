@@ -1831,89 +1831,6 @@ if (!isEmpty($genre)) {
 //
 
     if ($detailView || $recView) {
-
-//        $selectList = "distinct games.id as id,
-//                       games.author as author,
-//                       games.genre as genre,
-//                       games.tags as tags,
-//                       gametimes_mv.rounded_median_time_in_minutes as playtime";
-                       
-        // need to join the gameprofilelinks table to do this query
-
-//        $txt = mysql_real_escape_string($txt, $db);
-//        $tableList .= "games"
-//                    . " inner join gameprofilelinks as gpl "
-//                    . "on gpl.gameid = games.id "
-//                    . "and gpl.userid = '$pro'"
-//                    . " left outer join gametimes_mv "
-//                    . "on games.id = gametimes_mv.gameid";
-
-        // start out the WHERE and HAVING clauses as nothing
-//        $where = "";
-//        $having = "";
-
-
-//        case 'authorid':
-
-
-//        case 'rounded_median_time_in_minutes':
-                    // we need to join the gametimes mv table for this query    
-
-
-                // Add estimated play time to the select list so we can display it in results
-
-
-
-
-   // build the SELECT statement
-
-
-
-   $result = mysqli_execute_query($db,
-            "select distinct games.id as gameid,
-                games.author as author,
-                games.genre as genre,
-                games.tags as tags
-
-            from
-                games
-                limit 500
-                ");
-
- //                gametimes_mv.rounded_median_time_in_minutes as playtime               
-
-//                where not gameid = ?", [$id]);
-//                    inner join gameprofilelinks as gpl 
-//                        on gpl.gameid = games.id 
-//                        and gpl.userid = '$pro'
-//            limit 15;");
-//                    left outer join gametimes_mv 
-//                        on games.id = gametimes_mv.gameid
-
-if (!$result) throw new Exception("Error: " . mysqli_error($db));
-$found_games = [];
-$found_games = $result->fetch_all(MYSQLI_ASSOC);
-//print_r($found_games);
-
-$game_matches = [];
-foreach ($found_games as $found_game) {
-    $match_score = 0;
-    if ($genre = $found_game["genre"]) {
-        $match_score = $match_score + 1;
-    }
-    if ($match_score >= 1) {
-    echo "yes";
-       $game_match = [];
-       $game_match["gameid"] = $found_game["gameid"];
-       $game_match["score"] = $match_score;
-       $game_matches[] = $game_match;
-       print_r($game_match);
-   }
-}
-
-
-
-
         
         // Check for cross-recommendations.  There are two forms
         // of recommendation we generate: Recommend Lists that mention
@@ -3040,6 +2957,117 @@ if (count($inrefs) != 0 && !$historyView) {
 //
 // If we have any recommended lists mentioning the game, or any
 // cross-recommendations for games, list them
+
+//***
+
+//        $selectList = "distinct games.id as id,
+//                       games.author as author,
+//                       games.genre as genre,
+//                       games.tags as tags,
+//                       gametimes_mv.rounded_median_time_in_minutes as playtime";
+                       
+        // need to join the gameprofilelinks table to do this query
+
+//        $txt = mysql_real_escape_string($txt, $db);
+//        $tableList .= "games"
+//                    . " inner join gameprofilelinks as gpl "
+//                    . "on gpl.gameid = games.id "
+//                    . "and gpl.userid = '$pro'"
+//                    . " left outer join gametimes_mv "
+//                    . "on games.id = gametimes_mv.gameid";
+
+        // start out the WHERE and HAVING clauses as nothing
+//        $where = "";
+//        $having = "";
+
+
+//        case 'authorid':
+
+
+//        case 'rounded_median_time_in_minutes':
+                    // we need to join the gametimes mv table for this query    
+
+
+                // Add estimated play time to the select list so we can display it in results
+
+
+
+
+   // Get tags for the current game
+   $result = mysqli_execute_query($db,
+   "select distinct
+      tag
+    from gametags
+    where gameid = ?", [$id]);
+    if (!$result) throw new Exception("Error: " . mysqli_error($db));
+    $tags_for_this_game = [];
+    $tags_for_this_game = $result->fetch_all(MYSQLI_NUM);
+//    echo "TAGS FOR THIS GAME ";
+//    print_r($tags_for_this_game);
+    
+
+   $result = mysqli_execute_query($db,
+            "select distinct games.id as gameid,
+                games.author as author,
+                games.genre as genre,
+                games.tags as tags
+
+            from
+                games
+                limit 50
+                ");
+
+ //                gametimes_mv.rounded_median_time_in_minutes as playtime               
+
+//                where not gameid = ?", [$id]);
+//                    inner join gameprofilelinks as gpl 
+//                        on gpl.gameid = games.id 
+//                        and gpl.userid = '$pro'
+//            limit 15;");
+//                    left outer join gametimes_mv 
+//                        on games.id = gametimes_mv.gameid
+
+if (!$result) throw new Exception("Error: " . mysqli_error($db));
+$found_games = [];
+$found_games = $result->fetch_all(MYSQLI_ASSOC);
+echo "<br><br>FOUND GAMES = " . print_r($found_games);
+echo "<br><BR> Count of found games = " . count($found_games);
+
+$game_matches = [];
+$numgames=0;
+$maxgames=30;
+foreach ($found_games as $found_game) {
+    echo "<br><br>INFO ON THIS FOUND GAME: " . print_r($found_game[0]);
+    $numgames = $numgames + 1;
+    if ($numgames == $maxgames) break;
+    $match_score = 0;
+    if ($genre = $found_game["genre"]) {
+        $match_score = $match_score + 1;
+    }
+    foreach ($tags_for_this_game as $this_game_tag) {
+//        echo '<br><br>$this_game_tag[0] is ' . $this_game_tag[0];
+        foreach ($found_game as $found_game_tag) {
+            echo '<br><br>$found_game_tag is ' . $found_game_tag;
+            if ($this_game_tag[0] == $found_game_tag) {
+                echo "Matched tag: $this_game_tag[0] = $found_game_tag";
+                $match_score = $match_score + 1;
+                break;
+            }
+        }
+    }
+    if ($match_score >= 1) {
+    echo "<br><br>This games is a match: ";
+       $game_match = [];
+       $game_match["gameid"] = $found_game["gameid"];
+       $game_match["score"] = $match_score;
+//       $game_matches[] = $game_match;
+       print_r($game_match);
+   }
+}
+
+//***
+
+
     if ($detailView || $recView) {
 
         // show the header if (a) we have any recommendations to show,
