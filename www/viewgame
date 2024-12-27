@@ -3002,16 +3002,6 @@ if (count($inrefs) != 0 && !$historyView) {
     while ([$tag] = mysql_fetch_row($result)) {
         $tags_for_current_game[] = $tag;
     }
-//    echo "<br<br>TAGS FOR CUR GAME: ";
-//    foreach ($tags_for_current_game as $t) {
-//        echo "<br><br>TAG: $t";
-//    }
-
-
-
-
-
-
 
     $found_games_list = [];
     $result = mysqli_execute_query($db,
@@ -3022,7 +3012,7 @@ if (count($inrefs) != 0 && !$historyView) {
                 games.tags as tags
             from
                 games
-                limit 50");
+                limit 300");
 
  //                gametimes_mv.rounded_median_time_in_minutes as playtime               
 
@@ -3045,8 +3035,6 @@ while ([$found_gameid, $found_title, $found_author, $found_genres, $found_tags] 
     $found_games_list[] = $found_game;
 
 }
-//echo "<br><br>FOUUUUUUND GAMES: ";
-//var_dump($found_games_list);
 
 $game_matches = [];
 
@@ -3054,37 +3042,29 @@ foreach ($found_games_list as $found_game) {
     $match_score = 0;
     $matched_genres = [];
     $matched_tags = [];
-//    if ( isset($found_game["genres"]) ) {
-//        echo 5;
-        $found_genres_array = explode (",", $found_game["genres"]);
-//    }
-//    if ( isset($found_game["tags"]) ) {
-        $found_tags_array = explode (",", $found_game["tags"]);
+    $found_genres_array = explode (",", $found_game["genres"]);
+    $found_tags_array = explode (",", $found_game["tags"]);
 //    echo "<br><br>FOUND GAME: " . $found_game["gameid"];
 //    echo "<br><br>found game tags is " . $found_game["tags"];
 //    echo "<br><br>GENRE FOR CUR GAME IS $genre";
 //    }
     // Check for genre match
     $genres_for_current_game = explode(",", $genre);
-//    echo "<br><br>GFCG = " . var_dump($genres_for_current_game);
+    echo "<br><br>GFCG = " . var_dump($genres_for_current_game);
     foreach ($genres_for_current_game as $current_genre) {
-//        echo "Compare current genre $current_genre";
+        echo "Compare current genre $current_genre";
         foreach ($found_genres_array as $found_genre) {
-//            echo "to $found_genre";
+            echo "to $found_genre";
             if ($current_genre == $found_genre) {
                 $matched_genres[] = $found_genre;
-                $match_score = $match_score + 1;
+                echo "<br>MG is now " . var_dump($matched_genres);
+                $match_score = $match_score + 2;
        //                echo "<br><br>MATCH SCORE IS NOW $match_score";
             break;
             }
         }   
     }
-//    if ($genre == $found_game["genre"]) {
-//        echo "<br>genre matched: $genre = " . $found_game['genre'];
-//        $matched_genres[] = $found_game['genre'];
-//        $match_score = $match_score + 1;
-//        echo "<br><br>MATCH SCORE IS NOW $match_score";
-//    }
+
     // Check for tag match
 
     foreach ($tags_for_current_game as $curr_tag) {
@@ -3107,8 +3087,13 @@ foreach ($found_games_list as $found_game) {
        $game_match["score"] = $match_score;
        $game_match["gameid"] = $found_game["gameid"];
        $game_match["title"] = $found_game["title"];
-       if (count($matched_genres >= 1) ) {
-           $game_match["matched_genres"] = $matched_genres;
+//       if ( count($matched_genres >= 1) ) {
+//           echo 999;
+        $matched_genres_string = implode(", ", $matched_genres);
+        echo "<br>MGS is $matched_genres_string <br>";
+        if ($matched_genres_string != "") {
+           $game_match["matched_genres"] = $matched_genres_string;
+           echo " " . $game_match["matched_genres"];
        }
        if (count($matched_tags >= 1) ) {
            $game_match["matched_tags"] = implode(", ", $matched_tags);
@@ -3117,10 +3102,6 @@ foreach ($found_games_list as $found_game) {
 //       print_r($game_match);
    }
 }
-
-//usort($game_matches, function ($item1, $item2) {
-//    return $item2['score'] <=> $item1['score'];
-//});
 
 // Sort game matches by score, with the highest score first
 function sortByScore($a, $b) {
