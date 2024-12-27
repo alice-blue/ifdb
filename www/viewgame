@@ -2994,14 +2994,29 @@ if (count($inrefs) != 0 && !$historyView) {
 
 
    // Get tags for the current game
+
+   //***
    $result = mysqli_execute_query($db,
-   "select distinct
-      tag
-    from gametags
-    where gameid = ?", [$id]);
-    if (!$result) throw new Exception("Error: " . mysqli_error($db));
-    $tags_for_this_game = [];
-    $tags_for_this_game = $result->fetch_all(MYSQLI_NUM);
+   "select distinct tag from gametags where gameid = ?", [$id]);
+
+    $tags_for_current_game = [];
+    while ([$tag] = mysql_fetch_row($result)) {
+//        echo " <br><br> TAG: " . $tag;
+        $tags_for_current_game[] = $tag;
+    }
+    echo "<br<br>TAGS FOR CUR GAME: ";
+    foreach ($tags_for_current_game as $t) {
+        echo "<br><br>TAG: $t";
+    }
+//    " . print_r($tags_for_current_game) . "<br><br>";
+//   $result = mysqli_execute_query($db,
+//   "select distinct
+//      tag
+//    from gametags
+//    where gameid = ?", [$id]);
+//    if (!$result) throw new Exception("Error: " . mysqli_error($db));
+//    $tags_for_current_game = [];
+//    $tags_for_current_game = $result->fetch_all(MYSQLI_NUM);
 //    echo "TAGS FOR THIS GAME ";
 //    print_r($tags_for_this_game);
     
@@ -3029,15 +3044,18 @@ if (count($inrefs) != 0 && !$historyView) {
 
 if (!$result) throw new Exception("Error: " . mysqli_error($db));
 $found_games = [];
-$found_games = $result->fetch_all(MYSQLI_ASSOC);
-echo "<br><br>FOUND GAMES = " . print_r($found_games);
+$found_games = $result->fetch_all(MYSQLI_BOTH);
+echo "<br><br>FOUND GAMES = " . var_dump($found_games);
 echo "<br><BR> Count of found games = " . count($found_games);
 
 $game_matches = [];
 $numgames=0;
-$maxgames=30;
+$maxgames=10;
 foreach ($found_games as $found_game) {
-    echo "<br><br>INFO ON THIS FOUND GAME: " . print_r($found_game[0]);
+    echo "<br><br>INFO ON THIS FOUND GAME: ";
+    foreach ($found_game as $found_game_data_point) {
+        echo "<br>DATA POINT: $found_game_data_point";
+    }
     $numgames = $numgames + 1;
     if ($numgames == $maxgames) break;
     $match_score = 0;
