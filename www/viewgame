@@ -3039,36 +3039,28 @@ while ([$found_gameid, $found_author, $found_genre, $found_tags] = mysql_fetch_r
     
 //    = $found_game;
 }
-foreach ($found_games as $f) {
-    echo "<br><br>FOUND GAME: " . var_dump($f);
-}
-
-
-
-
-
-//$found_games = [];
-//$found_games = $result->fetch_all(MYSQLI_BOTH);
-//echo "<br><br>FOUND GAMES = " . var_dump($found_games);
-//echo "<br><BR> Count of found games = " . count($found_games);
 
 $game_matches = [];
 $numgames=0;
 $maxgames=10;
-foreach ($found_games as $found_game) {
-    echo "<br><br>INFO ON THIS FOUND GAME: ";
-    foreach ($found_game as $found_game_data_point) {
-        echo "<br>DATA POINT: $found_game_data_point";
-    }
-    $numgames = $numgames + 1;
-    if ($numgames == $maxgames) break;
-    $match_score = 0;
-    if ($genre = $found_game["genre"]) {
-        $match_score = $match_score + 1;
-    }
-    foreach ($tags_for_this_game as $this_game_tag) {
-//        echo '<br><br>$this_game_tag[0] is ' . $this_game_tag[0];
-        foreach ($found_game as $found_game_tag) {
+
+foreach ($found_games as $fg) {
+    echo "<br><br>FOUND GAME: " . print_r($fg);
+}
+//    echo "<br><br>INFO ON THIS FOUND GAME: ";
+//    foreach ($fg as $key => $value) {
+//        echo "<br>DATA POINT: $key -> $value";
+ //   }
+ //   $numgames = $numgames + 1;
+ //   if ($numgames = $maxgames) break;
+ //   $match_score = 0;
+ //   if ($genre = $found_game["genre"]) {
+ //       $match_score = $match_score + 1;
+ //   }
+    foreach ($tags_for_current_game as $this_game_tag) {
+        echo '<br><br>$this_game_tag is ' . $this_game_tag;
+        $found_tag_array = explode($found_game["tags"]);
+        foreach ($found_tag_array as $found_game_tag) {
             echo '<br><br>$found_game_tag is ' . $found_game_tag;
             if ($this_game_tag[0] == $found_game_tag) {
                 echo "Matched tag: $this_game_tag[0] = $found_game_tag";
@@ -3076,7 +3068,7 @@ foreach ($found_games as $found_game) {
                 break;
             }
         }
-    }
+//    }
     if ($match_score >= 1) {
     echo "<br><br>This games is a match: ";
        $game_match = [];
