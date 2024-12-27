@@ -2960,11 +2960,7 @@ if (count($inrefs) != 0 && !$historyView) {
 
 //***
 
-//        $selectList = "distinct games.id as id,
-//                       games.author as author,
-//                       games.genre as genre,
-//                       games.tags as tags,
-//                       gametimes_mv.rounded_median_time_in_minutes as playtime";
+//        $selectList = "gametimes_mv.rounded_median_time_in_minutes as playtime";
                        
         // need to join the gameprofilelinks table to do this query
 
@@ -2975,36 +2971,31 @@ if (count($inrefs) != 0 && !$historyView) {
 //                    . "and gpl.userid = '$pro'"
 //                    . " left outer join gametimes_mv "
 //                    . "on games.id = gametimes_mv.gameid";
-
-        // start out the WHERE and HAVING clauses as nothing
-//        $where = "";
-//        $having = "";
-
-
-//        case 'authorid':
-
-
+  //        case 'authorid':
 //        case 'rounded_median_time_in_minutes':
-                    // we need to join the gametimes mv table for this query    
+// we need to join the gametimes mv table for this query  
+ //                gametimes_mv.rounded_median_time_in_minutes as playtime               
+
+//                where not gameid = ?", [$id]);
+//                    inner join gameprofilelinks as gpl 
+//                        on gpl.gameid = games.id 
+//                        and gpl.userid = '$pro'
+//            limit 15;");
+//                    left outer join gametimes_mv 
+//                        on games.id = gametimes_mv.gameid
 
 
-                // Add estimated play time to the select list so we can display it in results
 
-   // Separate the genres for the current game
-   echo '<br>$genre is ' . $genre . '<br>';
-   $genres_for_current_game = explode("/",$genre);
-   echo "<br><br>GFCG = ";
-   print_r($genres_for_current_game);
-   echo "<br><br>";
+   // We have the genres for the current game as a string,
+   // so we need to separate them
+   $genres_for_current_game_array = explode("/",$genre);
 
    // Get tags for the current game
-
-   //***
-   $tags_for_current_game = [];
+   $tags_for_current_game_array = [];
    $result = mysqli_execute_query($db,
        "select distinct tag from gametags where gameid = ?", [$id]);
     while ([$tag] = mysql_fetch_row($result)) {
-        $tags_for_current_game[] = $tag;
+        $tags_for_current_game_array[] = $tag;
     }
 
     $found_games_list = [];
@@ -3016,75 +3007,41 @@ if (count($inrefs) != 0 && !$historyView) {
                 games.tags as tags
             from
                 games
-                limit 300");
+                limit 1000");
 
- //                gametimes_mv.rounded_median_time_in_minutes as playtime               
-
-//                where not gameid = ?", [$id]);
-//                    inner join gameprofilelinks as gpl 
-//                        on gpl.gameid = games.id 
-//                        and gpl.userid = '$pro'
-//            limit 15;");
-//                    left outer join gametimes_mv 
-//                        on games.id = gametimes_mv.gameid
 
 if (!$result) throw new Exception("Error: " . mysqli_error($db));
 //$found_genres = [];
 $game_matches = [];
+$points_for_matched_genre = 3;
+$points_for_matched_tag = 1;
 while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found_tags_string] = mysql_fetch_row($result) ) {
-//    $found_game = [];
-//    $found_game["gameid"] = $found_gameid;
-//    $found_game["title"] = $found_title;
-//    $found_game["author"] = $found_author;
-//    $found_game["genres"] = $found_genres;
-//    $found_game["tags"] = $found_tags;
-//    $found_games_list[] = $found_game;
-//
-//}
 
-echo "<br><br>Found Genres is a string: ";
-echo $found_genres_string;
-echo "<br><br>";
-//echo " B. ";
-//echo print_r($found_genres);
-
-
-//foreach ($found_games_list as $found_game) {
     $match_score = 0;
     $matched_genres_array = [];
     $matched_tags = [];
 
     $found_genres_array = [];
-    $found_genres_array = explode ("/", $found_genres_string);
-//    echo "<br>Split genres is ";
-//    echo var_dump($split_genres);
-    foreach ($found_genres_array as $g) {
-        if ($g != NULL) {
-            $found_genres_array[] = $g;
-            echo "<br>G is $g<br>";
-        }
+    if ($found_genres=string != "") {
+        $found_genres_array = explode ("/", $found_genres_string);
     }
-    $found_tags_array = explode (",", $found_tags_string);
-//    echo "<br><br>FOUND GAME: " . $found_game["gameid"];
+    $found_tags_array = [];
+    if ($found_tags=string != "") {
+        $found_tags_array = explode (",", $found_tags_string);
+    }
+    echo "<br><br>FOUND GAME: ";
 //    echo "<br><br>found game tags is " . $found_game["tags"];
-//    echo "<br><br>GENRE FOR CUR GAME IS $genre";
-//    }
 
-// Check for genre match
 
-    foreach ($genres_for_current_game as $current_genre) {
-        echo "<br>Compare current genre $current_genre<br> ";
+    // Check for genre match
+    foreach ($genres_for_current_game_array as $current_genre) {
+        echo "<br>Compare current genre ($current_genre) ";
         foreach ($found_genres_array as $found_genre) {
-            echo "to found genre $found_genre <br><br>";
+            echo "to found genre ($found_genre) <br><br>";
             if ($current_genre == $found_genre) {
-                echo ". MATCHED THE GENRE<br>";
-                echo 7;
+//                echo "MATCHED THE GENRE<br>";
                 $matched_genres_array[] = $found_genre;
-                echo 8;
-                echo "<br><br>Matched_Genres is now " . implode(",", $matched_genres_array) . "<br><br>";
-                echo 9;
-                $match_score = $match_score + 2;
-                       echo "<br><br>MATCH SCORE IS NOW $match_score";
+                $match_score = $match_score + $points_for_matched_genre;
                 break;
             }
         }   
@@ -3092,28 +3049,29 @@ echo "<br><br>";
 
     // Check for tag match
 
-    foreach ($tags_for_current_game as $current_tag) {
+    foreach ($tags_for_current_game_array as $current_tag) {
 //        echo '<br><br>current_tag is ' . $current_tag;
         foreach ($found_tags_array as $found_tag) {
 //            echo '<br><br>found_tag is ' . $found_tag;
             if ($current_tag == $found_tag) {
-//echo "Matched tag: $curr_tag = $found_tag";
+//              echo "Matched tag: $curr_tag = $found_tag";
                 $matched_tags[] = $found_tag;
 //                echo "<br><br>matched_tags is currently " . var_dump($matched_tags);
-                $match_score = $match_score + 1;
+                $match_score = $match_score + $points_for_matched_tag;
 //                echo "<br><br>MATCH SCORE IS NOW $match_score";
                 break;
             }
         }
     }
     if ($match_score >= 1) {
-//    echo "<br><br>This games is a match: ";
+       // This game is similar in some way to the current game, 
+       // so add it to the list of game matches   
        $matched_game = [];
        $matched_game["score"] = $match_score;
        $matched_game["gameid"] = $found_gameid;
        $matched_game["title"] = $found_title;
        $matched_genres_string = implode(", ", $matched_genres_array);
-       echo "<br>MGS is $matched_genres_string <br>";
+//       echo "<br>Matched genres string is $matched_genres_string <br>";
         if ($matched_genres_string != "") {
            $matched_game["matched_genres"] = $matched_genres_string;
            echo " " . $matched_game["matched_genres"];
@@ -3123,7 +3081,6 @@ echo "<br><br>";
            $matched_game["matched_tags"] = $matched_tags_string;
        }
        $game_matches[] = $matched_game;
-//       print_r($matched_game);
    }
 }
 
@@ -3132,28 +3089,24 @@ function sortByScore($a, $b) {
     return $b['score'] - $a['score'];
 }
 
-//echo " BEFORE: " . print_r($match);
 usort($game_matches, 'sortByScore');
-//echo "<br><br> AFTER: " . var_dump($match);
 
 $displayed_matches = 0;
 $max_matches = 10;
 foreach ($game_matches as $match) {
-    $displayed_matches = $displayed_matches + 1;
-    if ($displayed_matches == $max_matches) break;
-    echo "<br><br>MATCH #" . $displayed_matches . ": " . $match['title'];
-    echo "<br><strong>Match score:</strong> " . $match['score'];
+    $match_number = $displayed_matches + 1;
+    echo "<p><strong>MATCH #" . $match_number . ":</strong> " . $match['title'] . "";
+    echo "<br>Similarity score: " . $match['score'];
     if ( isset($match['matched_genres']) ) {
-        echo "<br><strong>Matched genres:</strong> ";
+        echo "<br>Matched genres: ";
         echo $match['matched_genres'];
-//        foreach ($match['matched_genres'] as $g) {
-//            echo " $g ";
-//        }
     }
     if ( isset($match['matched_tags']) ) {
-        echo "<br><strong>Matched tags:</strong> " . $match['matched_tags'];
+        echo "<br>Matched tags: " . $match['matched_tags'];
     }
-    echo "<br><br>";
+    echo "</p><br>";
+    $displayed_matches = $displayed_matches + 1;
+    if ($displayed_matches == $max_matches) break;
 }
 
 //***
