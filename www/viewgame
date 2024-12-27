@@ -3048,31 +3048,34 @@ var_dump($found_games);
 
 $game_matches = [];
 
-foreach ($found_games as $fg) {
+foreach ($found_games as $found_game) {
     echo "<br><br>FOUND GAME: " . print_r($fg);
-}
+
 //    echo "<br><br>INFO ON THIS FOUND GAME: ";
 //    foreach ($fg as $key => $value) {
 //        echo "<br>DATA POINT: $key -> $value";
  //   }
  //   $numgames = $numgames + 1;
  //   if ($numgames = $maxgames) break;
- //   $match_score = 0;
- //   if ($genre = $found_game["genre"]) {
- //       $match_score = $match_score + 1;
- //   }
-    foreach ($tags_for_current_game as $this_game_tag) {
-        echo '<br><br>$this_game_tag is ' . $this_game_tag;
-        $found_tag_array = explode($found_game["tags"]);
-        foreach ($found_tag_array as $found_game_tag) {
-            echo '<br><br>$found_game_tag is ' . $found_game_tag;
-            if ($this_game_tag[0] == $found_game_tag) {
-                echo "Matched tag: $this_game_tag[0] = $found_game_tag";
+    $match_score = 0;
+    if ($genre = $found_game["genre"]) {
+        echo "<br>genre matched: " . $found_game['genre'];
+        $match_score = $match_score + 1;
+    }
+    foreach ($tags_for_current_game as $curr_tag) {
+        echo '<br><br>$curr_tag is ' . $curr_tag;
+        echo "<br><br>found game tafs is " . $found_game["tags"];
+        $found_tag_array = explode (",", $found_game["tags"]);
+        print_r ($found_tag_array);
+        foreach ($found_tag_array as $found_tag) {
+            echo '<br><br>$found_tag is ' . $found_tag;
+            if ($curr_tag == $found_tag) {
+                echo "Matched tag: $curr_tag = $found_tag";
                 $match_score = $match_score + 1;
                 break;
             }
         }
-//    }
+    }
     if ($match_score >= 1) {
     echo "<br><br>This games is a match: ";
        $game_match = [];
