@@ -1877,7 +1877,7 @@ if (!isEmpty($genre)) {
 
             from
                 games
-                limit 15
+                limit 500
                 ");
 
  //                gametimes_mv.rounded_median_time_in_minutes as playtime               
@@ -1891,10 +1891,27 @@ if (!isEmpty($genre)) {
 //                        on games.id = gametimes_mv.gameid
 
 if (!$result) throw new Exception("Error: " . mysqli_error($db));
-$data = [];
-$data = $result->fetch_all(MYSQLI_ASSOC);
+$found_games = [];
+$found_games = $result->fetch_all(MYSQLI_ASSOC);
+//print_r($found_games);
 
-print_r($data);
+$game_matches = [];
+foreach ($found_games as $found_game) {
+    $match_score = 0;
+    if ($genre = $found_game["genre"]) {
+        $match_score = $match_score + 1;
+    }
+    if ($match_score >= 1) {
+    echo "yes";
+       $game_match = [];
+       $game_match["gameid"] = $found_game["gameid"];
+       $game_match["score"] = $match_score;
+       $game_matches[] = $game_match;
+       print_r($game_match);
+   }
+}
+
+
 
 
         
