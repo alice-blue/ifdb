@@ -3074,10 +3074,11 @@ foreach ($found_games_list as $found_game) {
         foreach ($found_tags_array as $found_tag) {
 //            echo '<br><br>found_tag is ' . $found_tag;
             if ($curr_tag == $found_tag) {
-                echo "Matched tag: $curr_tag = $found_tag";
-                $matched_tags[] = $found_game['tag'];
+//echo "Matched tag: $curr_tag = $found_tag";
+                $matched_tags[] = $found_tag;
+//                echo "<br><br>matched_tags is currently " . var_dump($matched_tags);
                 $match_score = $match_score + 1;
-                echo "<br><br>MATCH SCORE IS NOW $match_score";
+//                echo "<br><br>MATCH SCORE IS NOW $match_score";
                 break;
             }
         }
@@ -3092,7 +3093,7 @@ foreach ($found_games_list as $found_game) {
            $game_match["matched_genres"] = $matched_genres;
        }
        if (count($matched_tags >= 1) ) {
-           $game_match["matched_tags"] = $matched_tags;
+           $game_match["matched_tags"] = implode(", ", $matched_tags);
        }
        $game_matches[] = $game_match;
 //       print_r($game_match);
@@ -3122,11 +3123,7 @@ foreach ($game_matches as $match) {
         }
     }
     if ( isset($match['matched_tags']) ) {
-        echo "<br><strong>Matched tags:</strong> ";
-        echo " A " . var_dump($match['matched_tags']);
-        foreach ($match['matched_tags'] as $t) {
-            echo " B " . var_dump($t);
-        }
+        echo "<br><strong>Matched tags:</strong> " . $match['matched_tags'];
     }
     echo "<br><br>";
 }
