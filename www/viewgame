@@ -2997,29 +2997,15 @@ if (count($inrefs) != 0 && !$historyView) {
 
    //***
    $result = mysqli_execute_query($db,
-   "select distinct tag from gametags where gameid = ?", [$id]);
-
+       "select distinct tag from gametags where gameid = ?", [$id]);
     $tags_for_current_game = [];
     while ([$tag] = mysql_fetch_row($result)) {
-//        echo " <br><br> TAG: " . $tag;
         $tags_for_current_game[] = $tag;
     }
     echo "<br<br>TAGS FOR CUR GAME: ";
     foreach ($tags_for_current_game as $t) {
         echo "<br><br>TAG: $t";
     }
-//    " . print_r($tags_for_current_game) . "<br><br>";
-//   $result = mysqli_execute_query($db,
-//   "select distinct
-//      tag
-//    from gametags
-//    where gameid = ?", [$id]);
-//    if (!$result) throw new Exception("Error: " . mysqli_error($db));
-//    $tags_for_current_game = [];
-//    $tags_for_current_game = $result->fetch_all(MYSQLI_NUM);
-//    echo "TAGS FOR THIS GAME ";
-//    print_r($tags_for_this_game);
-    
 
    $result = mysqli_execute_query($db,
             "select distinct games.id as gameid,
@@ -3029,8 +3015,7 @@ if (count($inrefs) != 0 && !$historyView) {
 
             from
                 games
-                limit 50
-                ");
+                limit 10");
 
  //                gametimes_mv.rounded_median_time_in_minutes as playtime               
 
@@ -3044,9 +3029,28 @@ if (count($inrefs) != 0 && !$historyView) {
 
 if (!$result) throw new Exception("Error: " . mysqli_error($db));
 $found_games = [];
-$found_games = $result->fetch_all(MYSQLI_BOTH);
-echo "<br><br>FOUND GAMES = " . var_dump($found_games);
-echo "<br><BR> Count of found games = " . count($found_games);
+while ([$found_gameid, $found_author, $found_genre, $found_tags] = mysql_fetch_row($result)) {
+    $found_game = [];
+    $found_game["gameid"] = $found_gameid;
+    $found_game["author"] = $found_author;
+    $found_game["genre"] = $found_genre;
+    $found_game["tags"] = $found_tags;
+    $found_games[] = $found_game;
+    
+//    = $found_game;
+}
+foreach ($found_games as $f) {
+    echo "<br><br>FOUND GAME: " . var_dump($f);
+}
+
+
+
+
+
+//$found_games = [];
+//$found_games = $result->fetch_all(MYSQLI_BOTH);
+//echo "<br><br>FOUND GAMES = " . var_dump($found_games);
+//echo "<br><BR> Count of found games = " . count($found_games);
 
 $game_matches = [];
 $numgames=0;
