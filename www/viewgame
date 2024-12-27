@@ -3049,7 +3049,10 @@ var_dump($found_games);
 $game_matches = [];
 
 foreach ($found_games as $found_game) {
-    echo "<br><br>FOUND GAME: " . print_r($fg);
+    echo "<br><br>FOUND GAME: " . print_r($found_game);
+    echo "<br><br>found game tafs is " . $found_game["tags"];
+    $found_tag_array = explode (",", $found_game["tags"]);
+//        print_r ($found_tag_array);
 
 //    echo "<br><br>INFO ON THIS FOUND GAME: ";
 //    foreach ($fg as $key => $value) {
@@ -3064,9 +3067,6 @@ foreach ($found_games as $found_game) {
     }
     foreach ($tags_for_current_game as $curr_tag) {
         echo '<br><br>$curr_tag is ' . $curr_tag;
-        echo "<br><br>found game tafs is " . $found_game["tags"];
-        $found_tag_array = explode (",", $found_game["tags"]);
-        print_r ($found_tag_array);
         foreach ($found_tag_array as $found_tag) {
             echo '<br><br>$found_tag is ' . $found_tag;
             if ($curr_tag == $found_tag) {
