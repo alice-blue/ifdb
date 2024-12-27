@@ -3002,10 +3002,10 @@ if (count($inrefs) != 0 && !$historyView) {
     while ([$tag] = mysql_fetch_row($result)) {
         $tags_for_current_game[] = $tag;
     }
-    echo "<br<br>TAGS FOR CUR GAME: ";
-    foreach ($tags_for_current_game as $t) {
-        echo "<br><br>TAG: $t";
-    }
+//    echo "<br<br>TAGS FOR CUR GAME: ";
+//    foreach ($tags_for_current_game as $t) {
+//        echo "<br><br>TAG: $t";
+//    }
 
 
 
@@ -3022,7 +3022,7 @@ if (count($inrefs) != 0 && !$historyView) {
                 games.tags as tags
             from
                 games
-                limit 15");
+                limit 300");
 
  //                gametimes_mv.rounded_median_time_in_minutes as playtime               
 
@@ -3052,8 +3052,10 @@ $game_matches = [];
 
 foreach ($found_games_list as $found_game) {
     $match_score = 0;
-    if ($found_tag_array) {
-    $found_tag_array = explode (",", $found_game["tags"]);
+    $matched_genres = [];
+    $matched_tags = [];
+    if ($found_tags_array) {
+        $found_tags_array = explode (",", $found_game["tags"]);
 //    echo "<br><br>FOUND GAME: " . $found_game["gameid"];
 //    echo "<br><br>found game tags is " . $found_game["tags"];
 //    echo "<br><br>GENRE FOR CUR GAME IS $genre";
@@ -3061,30 +3063,39 @@ foreach ($found_games_list as $found_game) {
     // Check for genre match
     if ($genre == $found_game["genre"]) {
         echo "<br>genre matched: $genre = " . $found_game['genre'];
+        $matched_genres[] = $found_game['genre'];
         $match_score = $match_score + 1;
         echo "<br><br>MATCH SCORE IS NOW $match_score";
-    }// Check for tag match
+    }
+    // Check for tag match
 
-    foreach ($tags_for_current_game as $curr_tag) {
-        echo '<br><br>curr_tag is ' . $curr_tag;
-        foreach ($found_tag_array as $found_tag) {
-            echo '<br><br>found_tag is ' . $found_tag;
-            if ($curr_tag == $found_tag) {
+//    foreach ($tags_for_current_game as $curr_tag) {
+//        echo '<br><br>curr_tag is ' . $curr_tag;
+    foreach ($found_tags_array as $found_tag) {
+        echo '<br><br>found_tag is ' . $found_tag;
+        if ($curr_tag == $found_tag) {
                 echo "Matched tag: $curr_tag = $found_tag";
+                $matched_tags[] = $found_game['tag'];
                 $match_score = $match_score + 1;
                 echo "<br><br>MATCH SCORE IS NOW $match_score";
                 break;
             }
-        }
+//        }
     }
     if ($match_score >= 1) {
     echo "<br><br>This games is a match: ";
        $game_match = [];
+       $game_match["score"] = $match_score;
        $game_match["gameid"] = $found_game["gameid"];
        $game_match["title"] = $found_game["title"];
-       $game_match["score"] = $match_score;
+       if (count($matched_genres >= 1) ) {
+           $game_match["matched_genres"] = $matched_genres;
+       }
+       if (count($matched_tags >= 1) ) {
+           $game_match["matched_tags"] = $matched_tags;
+       }
        $game_matches[] = $game_match;
-//       print_r($game_match);
+       print_r($game_match);
    }
 }
 
@@ -3093,15 +3104,30 @@ foreach ($found_games_list as $found_game) {
 //});
 
 // Sort game matches by score, with the highest score first
-function sortGameMatches(array $a, array $b) {
-    return $b['score'] <=> $a['score'];
+function sortByScore($a, $b) {
+    return $b['score'] - $a['score'];
 }
 
-echo " BEFORE: " . print_r($match);
-usort($game_matches, 'sortGameMatches');
-echo "<br><br> AFTER: " . var_dump($match);
+//echo " BEFORE: " . print_r($match);
+usort($game_matches, 'sortByScore');
+//echo "<br><br> AFTER: " . var_dump($match);
 foreach ($game_matches as $match) {
-    echo "<bg><br>MATCH: " . print_r($match);
+    echo "<br><br>MATCHED GAME: " . $match['title'];
+//    var_dump($match);
+    echo "<br>Match score: " . $match['score'];
+    if ( isset($match['matched_genres']) ) {
+        echo "<br><strong>Matched genres:</strong> ";
+        foreach ($match['matched_genres'] as $g) {
+            echo " $g ";
+        }
+    }
+    if ( isset($match['matched_tags']) ) {
+        echo "<br><strong>Matched tags:</strong> ";
+        foreach ($match['matched_tags'] as $t) {
+            echo " $t ";
+        }
+    }
+    echo "<br><br>";
 }
 
 //***
