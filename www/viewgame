@@ -3131,8 +3131,9 @@ $found_genres_array = array_map('trim', $untrimmed_found_genres_array);
        $matched_game["score"] = $match_score;
        $matched_game["gameid"] = $found_gameid;
        $matched_game["title"] = $found_title;
+       $matched_genres_string = "";
        $matched_genres_string = implode(", ", $matched_genres_array);
-//       echo "<br>Matched genres string is $matched_genres_string <br>";
+       echo "<br>Matched genres string is $matched_genres_string <br>";
         if ($matched_genres_string != "") {
            $matched_game["matched_genres"] = $matched_genres_string;
            echo " " . $matched_game["matched_genres"];
