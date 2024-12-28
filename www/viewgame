@@ -3013,26 +3013,33 @@ if ($genre != "") {
     }
 }
 $current_game_genres_array = array_map('trim', $untrimmed_current_game_genres_array);
-var_dump ($current_game_genres_array);
-$genre1 = "";
-$genre2 = "";
-$genre3 = "";
-if ($current_game_genres_array) {
-    if ($current_game_genres_array[0] != "") {
-        $genre1 = $current_game_genres_array[0];
-        if ($current_game_genres_array[1] != "") {
-            $genre2 = $current_game_genres_array[1];
+//var_dump ($current_game_genres_array);
+$where_clause = "";
 
-            if ($current_game_genres_array[2] != "") {
-                $genre3 = $current_game_genres_array[2];
+
+if ($current_game_genres_array) {
+
+    if ($current_game_genres_array[0]) {
+        $where_clause = "where (genre = '" . $current_game_genres_array[0] . "') ";
+
+        if ($current_game_genres_array[1]) {
+            $where_clause .= " or (genre = '" . $current_game_genres_array[1] . "') ";
+
+            if ($current_game_genres_array[2]) {
+                $where_clause .= " or (genre = '" . $current_game_genres_array[2] . "') ";
+
+                if ($current_game_genres_array[3]) {
+                    $where_clause .= " or (genre = '" . $current_game_genres_array[3] . "') ";
+
+                }
             }
         }
      }
 
 }
-echo '$genre1 is ' . $genre1;
-echo '$genre2 is ' . $genre2;
-echo '$genre3 is ' . $genre3;
+
+//echo "<br>Where clause is $where_clause <br>";
+
 
 //   $genres_for_current_game_array = explode("/",$genre);
 
@@ -3044,8 +3051,7 @@ echo '$genre3 is ' . $genre3;
         $current_game_tags_array[] = $tag;
     }
 
-//    $found_games_list = [];
-;
+
     $result = mysqli_execute_query($db,
             "select distinct games.id as gameid,
                 games.title as title,
@@ -3054,11 +3060,9 @@ echo '$genre3 is ' . $genre3;
                 games.tags as tags
             from
                 games
-            where
-                (genre = '$genre1') or (genre = '$genre2') or (genre = '$genre3')
-            group by
-                gameid
-            limit 100");
+            $where_clause 
+            
+            limit 100;");
 
 
 if (!$result) throw new Exception("Error: " . mysqli_error($db));
