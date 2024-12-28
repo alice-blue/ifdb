@@ -3068,9 +3068,6 @@ $points_for_matched_genre = 3;
 $points_for_matched_tag = 1;
 while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found_tags_string] = mysql_fetch_row($result) ) {
     echo "<br><br>CHECKING GAME: $found_title";
-    $match_score = 0;
-    $matched_genres_array = [];
-    $matched_tags = [];
 
 //    $found_genres_array = [];
 //    if ($found_genres=string != "") {
@@ -3093,11 +3090,15 @@ $found_genres_array = array_map('trim', $untrimmed_found_genres_array);
 
 
     $found_tags_array = [];
-    if ($found_tags=string != "") {
+    if ($found_tags_string != "") {
         $found_tags_array = explode (",", $found_tags_string);
     }
 
 //    echo "<br><br>found game tags is " . $found_game["tags"];
+
+
+$matched_genres_array = [];
+$match_score = 0;
 
 
     // Check for genre match
@@ -3108,6 +3109,8 @@ $found_genres_array = array_map('trim', $untrimmed_found_genres_array);
             if ($current_genre == $found_genre) {
                 echo "MATCHING GENRE<br>";
                 $matched_genres_array[] = $found_genre;
+                // Why does this next line never print an arrray?
+                echo "<br><br>Matched Genres Array is " . var_dump($matched_genres_array) . "<br>";
                 $match_score = $match_score + $points_for_matched_genre;
                 break;
             }
@@ -3116,13 +3119,13 @@ $found_genres_array = array_map('trim', $untrimmed_found_genres_array);
     }
 
     // Check for tag match
-
+    $matched_tags = [];
     foreach ($current_game_tags_array as $current_tag) {
 //        echo '<br><br>current_tag is ' . $current_tag;
         foreach ($found_tags_array as $found_tag) {
 //            echo '<br><br>found_tag is ' . $found_tag;
             if ($current_tag == $found_tag) {
-//              echo "Matched tag: $curr_tag = $found_tag";
+//              echo "Matched tag: $current_tag = $found_tag";
                 $matched_tags[] = $found_tag;
 //                echo "<br><br>matched_tags is currently " . var_dump($matched_tags);
                 $match_score = $match_score + $points_for_matched_tag;
