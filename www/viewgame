@@ -3074,43 +3074,38 @@ while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found
 //        $found_genres_array = explode ("/", $found_genres_string);
 //    }
 
-$untrimmmed_found_genres_array = [];
-$found_genres_array = [];
-if ($found_genres_string != "") {
-    if (strpos($found_genres_string, ",") !== false) {
-        $untrimmed_found_genres_array = explode(",", $found_genres_string);
-    } else if (strpos($found_genres_string, "/") !== false) {
-        $untrimmed_found_genres_array = explode("/", $found_genres_string);
-    } else {
-        $untrimmed_found_genres_array[] = $found_genres_string;
+    $untrimmmed_found_genres_array = [];
+    $found_genres_array = [];
+    if ($found_genres_string != "") {
+        if (strpos($found_genres_string, ",") !== false) {
+            $untrimmed_found_genres_array = explode(",", $found_genres_string);
+        } else if (strpos($found_genres_string, "/") !== false) {
+            $untrimmed_found_genres_array = explode("/", $found_genres_string);
+        } else {
+            $untrimmed_found_genres_array[] = $found_genres_string;
+        }
     }
-}
-$found_genres_array = array_map('trim', $untrimmed_found_genres_array);
-
-
-
+    $found_genres_array = array_map('trim', $untrimmed_found_genres_array);
     $found_tags_array = [];
     if ($found_tags_string != "") {
         $found_tags_array = explode (",", $found_tags_string);
     }
 
-//    echo "<br><br>found game tags is " . $found_game["tags"];
+    //    echo "<br><br>found game tags is " . $found_game["tags"];
 
 
-$matched_genres_array = [];
-$match_score = 0;
-
-
+    $matched_genres_array = [];
+    $match_score = 0;
     // Check for genre match
     foreach ($current_game_genres_array as $current_genre) {
         echo "<br>Compare current genre ($current_genre)...";
         foreach ($found_genres_array as $found_genre) {
             echo "...to found genre ($found_genre) ";
             if ($current_genre == $found_genre) {
-                echo "MATCHING GENRE<br>";
+                echo "THIS GENRE IS A MATCH<br>";
+                // Does this next line actually work?
                 $matched_genres_array[] = $found_genre;
-                // Why does this next line never print an arrray?
-                echo "<br><br>Matched Genres Array is " . var_dump($matched_genres_array) . "<br>";
+                echo "<br><br>Matched Genres Array is " . json_encode($matched_genres_array) . "<br>";
                 $match_score = $match_score + $points_for_matched_genre;
                 break;
             }
@@ -3119,15 +3114,15 @@ $match_score = 0;
     }
 
     // Check for tag match
-    $matched_tags = [];
+    $matched_tags_array = [];
     foreach ($current_game_tags_array as $current_tag) {
 //        echo '<br><br>current_tag is ' . $current_tag;
         foreach ($found_tags_array as $found_tag) {
 //            echo '<br><br>found_tag is ' . $found_tag;
             if ($current_tag == $found_tag) {
 //              echo "Matched tag: $current_tag = $found_tag";
-                $matched_tags[] = $found_tag;
-//                echo "<br><br>matched_tags is currently " . var_dump($matched_tags);
+                $matched_tags_array[] = $found_tag;
+//                echo "<br><br>matched_tags is currently " . var_dump($matched_tags_array);
                 $match_score = $match_score + $points_for_matched_tag;
 //                echo "<br><br>MATCH SCORE IS NOW $match_score";
                 break;
@@ -3146,9 +3141,9 @@ $match_score = 0;
        echo "<br>Matched genres string is $matched_genres_string <br>";
         if ($matched_genres_string != "") {
            $matched_game["matched_genres"] = $matched_genres_string;
-           echo " " . $matched_game["matched_genres"];
+//           echo " " . $matched_game["matched_genres"];
        }
-       $matched_tags_string = implode(", ", $matched_tags);
+       $matched_tags_string = implode(", ", $matched_tags_array);
        if ($matched_tags_string != "") {
            $matched_game["matched_tags"] = $matched_tags_string;
        }
@@ -3173,8 +3168,7 @@ foreach ($game_matches as $match) {
     echo '</a>';
     echo "<br>Similarity score: " . $match['score'];
     if ( isset($match['matched_genres']) ) {
-        echo "<br>Matched genres: ";
-        echo $match['matched_genres'];
+        echo "<br>Matched genres: " . $match['matched_genres'];
     }
     if ( isset($match['matched_tags']) ) {
         echo "<br>Matched tags: " . $match['matched_tags'];
