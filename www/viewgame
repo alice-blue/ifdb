@@ -3014,20 +3014,25 @@ if ($genre != "") {
 }
 $current_game_genres_array = array_map('trim', $untrimmed_current_game_genres_array);
 var_dump ($current_game_genres_array);
-//$genre1 = "";
-//$genre2 = "";
-//$genre3 = "";
-//if ($current_game_genres_array) {
-//    if ($current_game_genres_array[0] != "") {
-//        $genre1 = $current_game_genres_array[0];
-//        if ($current_game_genres_array[1] != "") {
-//            $genre2 = $current_game_genres_array[1];
-//            if ($current_game_genres_array[2] != "") {
-//                $genre3 = $current_game_genres_array[2];
-//            }
-//        }
-//     }
-//}
+$genre1 = "";
+$genre2 = "";
+$genre3 = "";
+if ($current_game_genres_array) {
+    if ($current_game_genres_array[0] != "") {
+        $genre1 = $current_game_genres_array[0];
+        if ($current_game_genres_array[1] != "") {
+            $genre2 = $current_game_genres_array[1];
+
+            if ($current_game_genres_array[2] != "") {
+                $genre3 = $current_game_genres_array[2];
+            }
+        }
+     }
+
+}
+echo '$genre1 is ' . $genre1;
+echo '$genre2 is ' . $genre2;
+echo '$genre3 is ' . $genre3;
 
 //   $genres_for_current_game_array = explode("/",$genre);
 
@@ -3049,10 +3054,11 @@ var_dump ($current_game_genres_array);
                 games.tags as tags
             from
                 games
-            limit 1000");
-//            where
-//                genre in $current_game_genres_array
-//            limit 1000", [$current_game_genres_array]);
+            where
+                (genre = '$genre1') or (genre = '$genre2') or (genre = '$genre3')
+            group by
+                gameid
+            limit 100");
 
 
 if (!$result) throw new Exception("Error: " . mysqli_error($db));
@@ -3061,7 +3067,7 @@ $game_matches = [];
 $points_for_matched_genre = 3;
 $points_for_matched_tag = 1;
 while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found_tags_string] = mysql_fetch_row($result) ) {
-
+    echo "<br><br>CHECKING GAME: $found_title";
     $match_score = 0;
     $matched_genres_array = [];
     $matched_tags = [];
@@ -3090,21 +3096,22 @@ $found_genres_array = array_map('trim', $untrimmed_found_genres_array);
     if ($found_tags=string != "") {
         $found_tags_array = explode (",", $found_tags_string);
     }
-    echo "<br><br>FOUND GAME: ";
+
 //    echo "<br><br>found game tags is " . $found_game["tags"];
 
 
     // Check for genre match
     foreach ($current_game_genres_array as $current_genre) {
-        echo "<br>Compare current genre ($current_genre) ";
+        echo "<br>Compare current genre ($current_genre)...";
         foreach ($found_genres_array as $found_genre) {
-            echo "to found genre ($found_genre) <br><br>";
+            echo "...to found genre ($found_genre) ";
             if ($current_genre == $found_genre) {
-//                echo "MATCHED THE GENRE<br>";
+                echo "MATCHING GENRE<br>";
                 $matched_genres_array[] = $found_genre;
                 $match_score = $match_score + $points_for_matched_genre;
                 break;
             }
+            echo "<br><br>";
         }   
     }
 
@@ -3157,7 +3164,10 @@ $displayed_matches = 0;
 $max_matches = 10;
 foreach ($game_matches as $match) {
     $match_number = $displayed_matches + 1;
-    echo "<p><strong>MATCH #" . $match_number . ":</strong> " . $match['title'] . "";
+    echo '<p><strong>MATCH #' . $match_number . ':</strong> ';
+    echo '<a href="https://ifdb.org/viewgame?id=' . $match['gameid'] . '">';
+    echo $match['title'];
+    echo '</a>';
     echo "<br>Similarity score: " . $match['score'];
     if ( isset($match['matched_genres']) ) {
         echo "<br>Matched genres: ";
