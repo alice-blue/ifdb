@@ -3043,14 +3043,45 @@ if ($current_game_genres_array) {
 
 //   $genres_for_current_game_array = explode("/",$genre);
 
+
+   // Tags to ignore for matching purposes because they're not very helpful
+   $tags_to_ignore = ["walkthrough", "cover art", "Winner of a comp", "game doesn't exist"];
+
+   // If a tag includes any of these strings, ignore it for matching purposes
+   $tag_strings_to_ignore = [ "IFComp", "Spring Thing", "Interactive Fiction Top 50"; "transcript", "source", "Xyzzy Awards"];
+
    // Get tags for the current game
    $current_game_tags_array = [];
    $result = mysqli_execute_query($db,
        "select distinct tag from gametags where gameid = ?", [$id]);
-    while ([$tag] = mysql_fetch_row($result)) {
-        $current_game_tags_array[] = $tag;
-    }
+    while ([$current_tag] = mysql_fetch_row($result)) {
+        $exclude_current_tag = false;
 
+        // Check to see if the current tag exactly matches any tags on our 
+        // "ignore" list
+        foreach ($tags_to_ignore as $ignored_tag) {
+            if ($current_tag == $ignored_tag) {
+                $exclude_current_tag = true;
+                break;
+            }
+        }
+
+        // Check to see if the current tag includes any strings that mean 
+        // this tag should be ignored
+        if ($exclude_current_tag = false) {
+             foreach ($tag_strings_to_ignore as $ignored_string) {
+                 if (strpos($current_tag, $ignored_string) !== false) {
+                      $exclude_current_tag = true;
+                      break;
+                 }
+              }
+          }
+          // If we're not ignoring the current tag, add it to the list for comparison
+          // with other games
+          if ($exclude_current_tag = false) {
+              $current_game_tags_array[] = $current_tag;
+          }
+       }
 
     $result = mysqli_execute_query($db,
             "select distinct games.id as gameid,
