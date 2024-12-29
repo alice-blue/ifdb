@@ -3080,6 +3080,8 @@ if ($current_game_genres_array) {
           // with other games
           if ($exclude_current_tag = false) {
               $current_game_tags_array[] = $current_tag;
+          } else {
+              echo '<br>Ignoring tag "' . $current_tag . '"<br>';
           }
        }
 
