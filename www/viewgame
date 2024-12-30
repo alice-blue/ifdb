@@ -3050,7 +3050,7 @@ if ($current_game_genres_array) {
    $tags_to_ignore = ["walkthrough", "cover art", "Winner of a comp", "Free IF Playoffs", "game doesn't exist"];
 
    // If a tag includes any of these strings, ignore it for matching purposes
-   $tag_strings_to_ignore = ["IFComp", "Spring Thing", "Interactive Fiction Top 50", "transcript", "source", "Xyzzy Awards", "ParserComp ", "Text Adventure iteracy Jam "];
+   $tag_strings_to_ignore = ["IFComp", "Spring Thing", "Interactive Fiction Top 50", "transcript", "source", "Xyzzy Awards", "Best Game", "ParserComp ", "Text Adventure iteracy Jam "];
 
    // Get tags for the current game
    $current_game_tags_array = [];
@@ -3114,9 +3114,9 @@ if ($current_game_genres_array) {
                 games.tags as tags
             from
                 games
-            $where_clause
+            $where_clause;");
             
-            limit 1000;");
+//            limit 10000;");
 
 
 if (!$result) throw new Exception("Error: " . mysqli_error($db));
