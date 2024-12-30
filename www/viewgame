@@ -3014,7 +3014,7 @@ if ($genre != "") {
 }
 $current_game_genres_array = array_map('trim', $untrimmed_current_game_genres_array);
 //var_dump ($current_game_genres_array);
-$where_clause = "";
+//$where_clause = "";
 
 
 if ($current_game_genres_array) {
@@ -3066,7 +3066,7 @@ if ($current_game_genres_array) {
     while ([$current_tag, $current_tag_frequency] = mysql_fetch_row($result)) {
 
         $exclude_current_tag = false;
-        echo "<br>CURRENT TAG: $current_tag   CURRENT FREQ: $current_tag_frequency<br>";
+        echo "<br><br><br><strong>CURRENT TAG:</strong> $current_tag<br>FREQUENCY IN DATABASE: $current_tag_frequency";
 
         // Check to see if the current tag exactly matches any tags on our 
         // "ignore" list
@@ -3090,16 +3090,17 @@ if ($current_game_genres_array) {
           // If we're not ignoring the current tag, add it to the list for comparison
           // with other games
           if ($exclude_current_tag == false) {
-
+//              echo "<br>TAG: $current_tag<br>";
               if ($tag_frequency_divisor == 0) {
-                  $tag_frequency_divisor = ($current_tag_frequency / 4);
+                  $tag_frequency_divisor = round( ($current_tag_frequency/3), 2);
               }
-
-              $simplified_tag_frequency = ceil ($current_tag_frequency / $tag_frequency_divisor);
-              $uniqueness_points = ( (-$simplified_tag_frequency) + 4);
-              echo "<br>Tag: $current_tag    Uniqueness points: $uniqueness_points<br>";
+              echo "<br> Dividing by $tag_frequency_divisor";
+              $tag_frequency_scaled_down = round($current_tag_frequency / $tag_frequency_divisor);
+              echo "<br>Tag freq scaled down: $tag_frequency_scaled_down";
+              $uniqueness_points = (-$tag_frequency_scaled_down + 4);
+              echo "<br>Uniqueness points: $uniqueness_points<br>";
               $current_game_tags_array[$current_tag] = $uniqueness_points;
-              print_r($current_game_tags_array);
+//              print_r($current_game_tags_array);
           } else {
               echo '<br>Ignoring tag "' . $current_tag . '"<br>';
           }
@@ -3115,7 +3116,7 @@ if ($current_game_genres_array) {
                 games
             $where_clause
             
-            limit 500;");
+            limit 1000;");
 
 
 if (!$result) throw new Exception("Error: " . mysqli_error($db));
@@ -3153,32 +3154,33 @@ while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found
     // Check for genre matches
     $matched_genres_array = [];
     foreach ($current_game_genres_array as $current_genre) {
-        echo "<br> * Compare current genre ($current_genre)...";
+//        echo "<br> * Compare current genre ($current_genre)...";
         foreach ($found_genres_array as $found_genre) {
-            echo "...to found genre ($found_genre) ";
+//            echo "...to found genre ($found_genre) ";
             if ($current_genre == $found_genre) {
-                echo "THIS GENRE IS A MATCH<br>";
+//                echo "THIS GENRE IS A MATCH<br>";
                 // Does this next line actually work?
                 $matched_genres_array[] = $found_genre;
                 $match_score = $match_score + $points_for_matched_genre;
                 break;
             }
-            echo "<br><br>";
+//            echo "<br><br>";
         }   
     }
   //  echo "<br><br>Matched Genres Array is " . json_encode($matched_genres_array) . "<br>";
 
     // Check for tag matches
     $matched_tags_array = [];
-    foreach ($current_game_tags_array as $current_tag) {
+    foreach ($current_game_tags_array as $current_tag => $uniqueness_points) {
 //        echo '<br><br>current_tag is ' . $current_tag;
         foreach ($found_tags_array as $found_tag) {
 //            echo '<br><br>found_tag is ' . $found_tag;
             if ($current_tag == $found_tag) {
 //              echo "Matched tag: $current_tag = $found_tag";
                 $matched_tags_array[] = $found_tag;
+//                  $matched_tags_array[$found_tag] = $uniqueness_points;
 //                echo "<br><br>matched_tags is currently " . var_dump($matched_tags_array);
-                $match_score = $match_score + $points_for_matched_tag;
+                $match_score = $match_score + $uniqueness_points;
 //                echo "<br><br>MATCH SCORE IS NOW $match_score";
                 break;
             }
@@ -3214,7 +3216,7 @@ function sortByScore($a, $b) {
 usort($game_matches, 'sortByScore');
 
 $displayed_matches = 0;
-$max_matches = 20;
+$max_matches = 30;
 foreach ($game_matches as $match) {
     $match_number = $displayed_matches + 1;
     echo '<p><strong>MATCH #' . $match_number . ':</strong> ';
