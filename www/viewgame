@@ -3047,7 +3047,7 @@ if ($current_game_genres_array) {
 
 
    // Tags to ignore for matching purposes because they're not very helpful
-   $tags_to_ignore = ["walkthrough", "cover art", "Winner of a comp", "Free IF Playoffs", "game doesn't exist"];
+   $tags_to_ignore = ["walkthrough", "cover art", "Winner of a comp", "Miss Congeniality Winner", "Free IF Playoffs", "game doesn't exist"];
 
    // If a tag includes any of these strings, ignore it for matching purposes
    $tag_strings_to_ignore = ["IFComp", "Spring Thing", "Interactive Fiction Top 50", "transcript", "source", "Xyzzy Awards", "Best Game", "ParserComp ", "Text Adventure iteracy Jam "];
