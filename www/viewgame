@@ -2997,53 +2997,7 @@ if (count($inrefs) != 0 && !$historyView) {
 //                    $items[] = trim($g[$j]);
 
 
-                // the genre field can have multiple entries, separated
-                // by commas or slashes - split up the field into the
-                // individual entries
 
-$untrimmmed_current_game_genres_array = [];
-$current_game_genres_array = [];
-if ($genre != "") {
-    if (strpos($genre, ",") !== false) {
-        $untrimmed_current_game_genres_array = explode(",", $genre);
-    } else if (strpos($genre, "/") !== false) {
-        $untrimmed_current_game_genres_array = explode("/", $genre);
-    } else {
-        $untrimmed_current_game_genres_array[] = $genre;
-    }
-}
-$current_game_genres_array = array_map('trim', $untrimmed_current_game_genres_array);
-//var_dump ($current_game_genres_array);
-//$where_clause = "";
-
-
-if ($current_game_genres_array) {
-
-    if ($current_game_genres_array[0]) {
-        $where_clause = "where (genre = '" . $current_game_genres_array[0] . "') ";
-
-        if ($current_game_genres_array[1]) {
-            $where_clause .= " or (genre = '" . $current_game_genres_array[1] . "') ";
-
-            if ($current_game_genres_array[2]) {
-                $where_clause .= " or (genre = '" . $current_game_genres_array[2] . "') ";
-
-                if ($current_game_genres_array[3]) {
-                    $where_clause .= " or (genre = '" . $current_game_genres_array[3] . "') ";
-
-                }
-            }
-        }
-     }
-
-}
-
-//echo "<br>Where clause is $where_clause <br>";
-
-// Uncomment to avoid limiting results by genre:
-//  $where_clause =""; 
-
-//   $genres_for_current_game_array = explode("/",$genre);
 
 
    // Tags to ignore for matching purposes because they're not very helpful
@@ -3109,6 +3063,88 @@ if ($current_game_genres_array) {
               echo '<br>Ignoring tag "' . $current_tag . '"<br>';
           }
        }
+
+
+
+
+
+
+                // the genre field can have multiple entries, separated
+                // by commas or slashes - split up the field into the
+                // individual entries
+
+$untrimmmed_current_game_genres_array = [];
+$current_game_genres_array = [];
+if ($genre != "") {
+    if (strpos($genre, ",") !== false) {
+        $untrimmed_current_game_genres_array = explode(",", $genre);
+    } else if (strpos($genre, "/") !== false) {
+        $untrimmed_current_game_genres_array = explode("/", $genre);
+    } else {
+        $untrimmed_current_game_genres_array[] = $genre;
+    }
+}
+$current_game_genres_array = array_map('trim', $untrimmed_current_game_genres_array);
+//var_dump ($current_game_genres_array);
+//$where_clause = "";
+
+
+if ($current_game_genres_array) {
+    foreach ($current_game_genres_array as $current_genre) {
+         if $where_clause == "" {
+                $where_clause = "WHERE";
+            } else {
+                $where_clause .= " OR";
+            }
+            $where_clause .= " (genre = '" . $current_genre . "')";
+}
+
+//    if ($current_game_genres_array[0]) {
+//        $where_clause = "WHERE (genre = '" . $current_game_genres_array[0] . "') ";
+
+//        if ($current_game_genres_array[1]) {
+//            $where_clause .= " OR (genre = '" . $current_game_genres_array[1] . "') ";
+
+//            if ($current_game_genres_array[2]) {
+//                $where_clause .= " OR (genre = '" . $current_game_genres_array[2] . "') ";
+
+//                if ($current_game_genres_array[3]) {
+//                    $where_clause .= " OR (genre = '" . $current_game_genres_array[3] . "') ";
+
+//                }
+//            }
+//        }
+//     }
+
+//}
+
+
+// Depending on the current game's tags, we may want to add some more possible genres to the WHERE clause 
+// so that we can compare with those games, too
+
+$tag_to_genre_correspondence = [humor => Comedy; comedy => Humor; wordplay => Wordplay; mythology => Mythological; science fiction => Science Fiction; fantasy => Fantasy];
+
+foreach ($current_game_tags_array as $current_tag => uniqueness_points) {
+    foreach ($tag_to_genre_correspondence as $corresponding_tag => $corresponding_genre) {
+        if ($current_tag == $corresponding_tag && $corresponding_genre !in $current_game_genres_array) {
+            if $where_clause == "" {
+                $where_clause .= "WHERE";
+            } else {
+                $where_clause .= " OR";
+            }
+            $where_clause .= " (genre = '" . $corresponding_genre . "')";
+         }
+    }
+}
+
+
+echo "<br>Where clause is $where_clause <br>";
+
+// Uncomment to avoid limiting results by genre:
+//  $where_clause =""; 
+
+//   $genres_for_current_game_array = explode("/",$genre);
+
 
     $result = mysqli_execute_query($db,
             "select distinct games.id as gameid,
