@@ -3060,10 +3060,13 @@ if ($current_game_genres_array) {
         "select tag, count(distinct gameid) as tag_frequency from gametags where tag in
            (select distinct tag from gametags where gameid = ?)
            group by tag
-           order by tag_freq desc", [$id]);
+           order by tag_frequency desc", [$id]);
+    $tag_frequency_divisor = 0;
 
-    while ([$current_tag] = mysql_fetch_row($result)) {
+    while ([$current_tag, $current_tag_frequency] = mysql_fetch_row($result)) {
+
         $exclude_current_tag = false;
+        echo "<br>CURRENT TAG: $current_tag   CURRENT FREQ: $current_tag_frequency<br>";
 
         // Check to see if the current tag exactly matches any tags on our 
         // "ignore" list
@@ -3087,7 +3090,16 @@ if ($current_game_genres_array) {
           // If we're not ignoring the current tag, add it to the list for comparison
           // with other games
           if ($exclude_current_tag == false) {
-              $current_game_tags_array[] = $current_tag;
+
+              if ($tag_frequency_divisor == 0) {
+                  $tag_frequency_divisor = ($current_tag_frequency / 4);
+              }
+
+              $simplified_tag_frequency = ceil ($current_tag_frequency / $tag_frequency_divisor);
+              $uniqueness_points = ( (-$simplified_tag_frequency) + 4);
+              echo "<br>Tag: $current_tag    Uniqueness points: $uniqueness_points<br>";
+              $current_game_tags_array[$current_tag] = $uniqueness_points;
+              print_r($current_game_tags_array);
           } else {
               echo '<br>Ignoring tag "' . $current_tag . '"<br>';
           }
@@ -3101,9 +3113,9 @@ if ($current_game_genres_array) {
                 games.tags as tags
             from
                 games
-            $where_clause;");
+            $where_clause
             
-//            limit 1000;");
+            limit 500;");
 
 
 if (!$result) throw new Exception("Error: " . mysqli_error($db));
@@ -3112,7 +3124,7 @@ $game_matches = [];
 $points_for_matched_genre = 3;
 $points_for_matched_tag = 1;
 while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found_tags_string] = mysql_fetch_row($result) ) {
-    echo "<br><br>CHECKING GAME: $found_title";
+//    echo "<br><br>CHECKING GAME: $found_title";
     
     // Get the genres for the game we've just found
     $untrimmmed_found_genres_array = [];
