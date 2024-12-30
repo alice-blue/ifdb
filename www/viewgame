@@ -3085,18 +3085,26 @@ if ($genre != "") {
     }
 }
 $current_game_genres_array = array_map('trim', $untrimmed_current_game_genres_array);
+//$foreach ($current_game_genres_array as $current_genre) {
+//    if 
+//}
+// "humor" => "Comedy",
+//"comedy" => "Humor",
 //var_dump ($current_game_genres_array);
 //$where_clause = "";
 
 
 if ($current_game_genres_array) {
     foreach ($current_game_genres_array as $current_genre) {
-         if $where_clause == "" {
+         if ($where_clause == "") {
                 $where_clause = "WHERE";
             } else {
                 $where_clause .= " OR";
             }
-            $where_clause .= " (genre = '" . $current_genre . "')";
+//            $where_clause .= " (genre = '" . $current_genre . "')";
+//'%word1%'
+            $where_clause .= " (genre LIKE '%" . $current_genre . "%')";
+
 }
 
 //    if ($current_game_genres_array[0]) {
@@ -3122,21 +3130,31 @@ if ($current_game_genres_array) {
 // Depending on the current game's tags, we may want to add some more possible genres to the WHERE clause 
 // so that we can compare with those games, too
 
-$tag_to_genre_correspondence = [humor => Comedy; comedy => Humor; wordplay => Wordplay; mythology => Mythological; science fiction => Science Fiction; fantasy => Fantasy];
+$tag_to_genre_correspondence = ["wordplay" => "Wordplay",
+                                "mythology" => "Mythological",
+                                "science fiction" => "Science Fiction",
+                                "fantasy" => "Fantasy"];
 
-foreach ($current_game_tags_array as $current_tag => uniqueness_points) {
+// "humor" => "Comedy",
+//"comedy" => "Humor",
+
+foreach ($current_game_tags_array as $current_tag => $uniqueness_points) {
     foreach ($tag_to_genre_correspondence as $corresponding_tag => $corresponding_genre) {
-        if ($current_tag == $corresponding_tag && $corresponding_genre !in $current_game_genres_array) {
-            if $where_clause == "" {
+        if ($current_tag == $corresponding_tag) {
+     //       foreach ($current_game_genres_array as $current_genre) {
+     //           if $corresponding_genre == $current_game_genres_array {
+            if ($where_clause == "") {
                 $where_clause .= "WHERE";
             } else {
                 $where_clause .= " OR";
             }
-            $where_clause .= " (genre = '" . $corresponding_genre . "')";
-         }
+//            $where_clause .= " (genre = '" . $corresponding_genre . "')";
+
+            $where_clause .= " (genre LIKE '%" . $corresponding_genre . "%')";
+        }
     }
 }
-
+}
 
 echo "<br>Where clause is $where_clause <br>";
 
@@ -3165,7 +3183,7 @@ $game_matches = [];
 $points_for_matched_genre = 4;
 //$points_for_matched_tag = 1;
 while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found_tags_string] = mysql_fetch_row($result) ) {
-    echo "<br><br>CHECKING GAME: $found_title";
+//    echo "<br><br>CHECKING GAME: $found_title";
     
     // Get the genres for the game we've just found
     $untrimmmed_found_genres_array = [];
@@ -3194,11 +3212,11 @@ while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found
     // Check for genre matches
     $matched_genres_array = [];
     foreach ($current_game_genres_array as $current_genre) {
-        echo "<br> * Compare current genre ($current_genre)...";
+ //       echo "<br> * Compare current genre ($current_genre)...";
         foreach ($found_genres_array as $found_genre) {
-            echo "...to found genre ($found_genre) ";
+ //           echo "...to found genre ($found_genre) ";
             if ($current_genre == $found_genre) {
-                echo "THIS GENRE IS A MATCH<br>";
+//             echo "THIS GENRE IS A MATCH<br>";
                 // Does this next line actually work?
                 $matched_genres_array[] = $found_genre;
                 $match_score = $match_score + $points_for_matched_genre;
@@ -3206,10 +3224,10 @@ while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found
             }
 //            echo "<br><br>";
         }   
-        echo "<br> # of common genres: " . count($matched_genres_array);
+//        echo "<br> # of common genres: " . count($matched_genres_array);
         if ( count($matched_genres_array) >= 2) {
-            // If more than one genre is matched, add an extra 5 points to the score
-            $match_score = $match_score + 5;
+            // If more than one genre is matched, add an extra 10 points to the score
+            $match_score = $match_score + 10;
         }
     }
   //  echo "<br><br>Matched Genres Array is " . json_encode($matched_genres_array) . "<br>";
