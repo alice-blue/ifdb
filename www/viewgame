@@ -3050,12 +3050,12 @@ if (count($inrefs) != 0 && !$historyView) {
           if ($exclude_current_tag == false) {
 //              echo "<br>TAG: $current_tag<br>";
               if ($tag_frequency_divisor == 0) {
-                  $tag_frequency_divisor = round( ($current_tag_frequency/3), 2);
+                  $tag_frequency_divisor = round( ($current_tag_frequency/4), 2);
               }
               echo "<br> Dividing by $tag_frequency_divisor";
               $tag_frequency_scaled_down = round($current_tag_frequency / $tag_frequency_divisor);
               echo "<br>Tag freq scaled down: $tag_frequency_scaled_down";
-              $uniqueness_points = (-$tag_frequency_scaled_down + 4);
+              $uniqueness_points = (-$tag_frequency_scaled_down + 5);
               echo "<br>Uniqueness points: $uniqueness_points<br>";
               $current_game_tags_array[$current_tag] = $uniqueness_points;
 //              print_r($current_game_tags_array);
