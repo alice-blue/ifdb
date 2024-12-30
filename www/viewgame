@@ -3047,10 +3047,14 @@ if ($current_game_genres_array) {
 
 
    // Tags to ignore for matching purposes because they're not very helpful
-   $tags_to_ignore = ["walkthrough", "cover art", "Winner of a comp", "Miss Congeniality Winner", "Free IF Playoffs", "game doesn't exist"];
+   $tags_to_ignore = ["walkthrough", "cover art", "Winner of a comp", 
+       "Miss Congeniality Winner", "Free IF Playoffs", "Let's Play", 
+       "game doesn't exist"];
 
    // If a tag includes any of these strings, ignore it for matching purposes
-   $tag_strings_to_ignore = ["IFComp", "Spring Thing", "Interactive Fiction Top 50", "transcript", "source", "Xyzzy Awards", "Best Game", "ParserComp ", "Text Adventure iteracy Jam "];
+   $tag_strings_to_ignore = ["IFComp", "ifcomp", "Spring Thing", "Interactive Fiction Top 50", 
+       "transcript", "source", "IF Comp", "Xyzzy Awards", "Best Game", "ParserComp ", 
+       "Text Adventure Literacy Jam ", "Jay is games"];
 
    // Get tags for the current game
    $current_game_tags_array = [];
@@ -3122,10 +3126,10 @@ if ($current_game_genres_array) {
 if (!$result) throw new Exception("Error: " . mysqli_error($db));
 //$found_genres = [];
 $game_matches = [];
-$points_for_matched_genre = 3;
-$points_for_matched_tag = 1;
+$points_for_matched_genre = 4;
+//$points_for_matched_tag = 1;
 while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found_tags_string] = mysql_fetch_row($result) ) {
-//    echo "<br><br>CHECKING GAME: $found_title";
+    echo "<br><br>CHECKING GAME: $found_title";
     
     // Get the genres for the game we've just found
     $untrimmmed_found_genres_array = [];
@@ -3154,11 +3158,11 @@ while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found
     // Check for genre matches
     $matched_genres_array = [];
     foreach ($current_game_genres_array as $current_genre) {
-//        echo "<br> * Compare current genre ($current_genre)...";
+        echo "<br> * Compare current genre ($current_genre)...";
         foreach ($found_genres_array as $found_genre) {
-//            echo "...to found genre ($found_genre) ";
+            echo "...to found genre ($found_genre) ";
             if ($current_genre == $found_genre) {
-//                echo "THIS GENRE IS A MATCH<br>";
+                echo "THIS GENRE IS A MATCH<br>";
                 // Does this next line actually work?
                 $matched_genres_array[] = $found_genre;
                 $match_score = $match_score + $points_for_matched_genre;
@@ -3166,6 +3170,11 @@ while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found
             }
 //            echo "<br><br>";
         }   
+        echo "<br> # of common genres: " . count($matched_genres_array);
+        if ( count($matched_genres_array) >= 2) {
+            // If more than one genre is matched, add an extra 5 points to the score
+            $match_score = $match_score + 5;
+        }
     }
   //  echo "<br><br>Matched Genres Array is " . json_encode($matched_genres_array) . "<br>";
 
