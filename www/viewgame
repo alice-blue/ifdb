@@ -3055,7 +3055,13 @@ if ($current_game_genres_array) {
    // Get tags for the current game
    $current_game_tags_array = [];
    $result = mysqli_execute_query($db,
-       "select distinct tag from gametags where gameid = ?", [$id]);
+//       "select distinct tag from gametags where gameid = ?", [$id]);
+
+        "select tag, count(distinct gameid) as tag_frequency from gametags where tag in
+           (select distinct tag from gametags where gameid = ?)
+           group by tag
+           order by tag_freq desc", [$id]);
+
     while ([$current_tag] = mysql_fetch_row($result)) {
         $exclude_current_tag = false;
 
