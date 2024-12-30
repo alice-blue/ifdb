@@ -2960,46 +2960,6 @@ if (count($inrefs) != 0 && !$historyView) {
 
 //***
 
-//        $selectList = "gametimes_mv.rounded_median_time_in_minutes as playtime";
-                       
-        // need to join the gameprofilelinks table to do this query
-
-//        $txt = mysql_real_escape_string($txt, $db);
-//        $tableList .= "games"
-//                    . " inner join gameprofilelinks as gpl "
-//                    . "on gpl.gameid = games.id "
-//                    . "and gpl.userid = '$pro'"
-//                    . " left outer join gametimes_mv "
-//                    . "on games.id = gametimes_mv.gameid";
-  //        case 'authorid':
-//        case 'rounded_median_time_in_minutes':
-// we need to join the gametimes mv table for this query  
- //                gametimes_mv.rounded_median_time_in_minutes as playtime               
-
-//                where not gameid = ?", [$id]);
-//                    inner join gameprofilelinks as gpl 
-//                        on gpl.gameid = games.id 
-//                        and gpl.userid = '$pro'
-//            limit 15;");
-//                    left outer join gametimes_mv 
-//                        on games.id = gametimes_mv.gameid
-
-
-//                if (strpos($g, ",") !== false)
-//                    $g = explode(",", $g);
-//                else if (strpos($g, "/") !== false)
-//                    $g = explode("/", $g);
-//                else
-//                    $g = array($g);
-
-//                // add each element
-//                for ($j = 0 ; $j < count($g) ; $j++)
-//                    $items[] = trim($g[$j]);
-
-
-
-
-
    // Tags to ignore for matching purposes because they're not very helpful
    $tags_to_ignore = ["walkthrough", "cover art", "Winner of a comp", "translation available",
        "Miss Congeniality Winner", "Free IF Playoffs", "Let's Play", 
@@ -3024,13 +2984,13 @@ if (count($inrefs) != 0 && !$historyView) {
     while ([$current_tag, $current_tag_frequency] = mysql_fetch_row($result)) {
 
         $exclude_current_tag = false;
-        echo "<br><br><strong>CURRENT TAG:</strong> $current_tag<br>FREQUENCY IN DATABASE: $current_tag_frequency";
+        echo "<br><br><strong>CURRENT TAG:</strong> $current_tag<br>Frequency in database: $current_tag_frequency";
 
         // Check to see if the current tag exactly matches any tags on our 
         // "ignore" list
         foreach ($tags_to_ignore as $ignored_tag) {
-            if ($current_tag === $ignored_tag) {
-                $exclude_current_tag = true;
+            if ( strcasecmp($current_tag, $ignored_tag) == 0) {
+                $exclude_current_tag = true ;
                 break;
             }
         }
@@ -3065,13 +3025,9 @@ if (count($inrefs) != 0 && !$historyView) {
        }
 
 
-
-
-
-
-                // the genre field can have multiple entries, separated
-                // by commas or slashes - split up the field into the
-                // individual entries
+// the genre field can have multiple entries, separated
+// by commas or slashes - split up the field into the
+// individual entries
 
 $untrimmmed_current_game_genres_array = [];
 $current_game_genres_array = [];
@@ -3084,9 +3040,9 @@ if ($genre != "") {
     } else {
         $untrimmed_current_game_genres_array[] = $genre;
     }
-    echo "Count of CGA is ..." . count($current_game_genres_array);
+//    echo "Count of CGA is ..." . count($current_game_genres_array);
     $current_game_genres_array = array_map('trim', $untrimmed_current_game_genres_array);
-    echo 1;
+
     foreach ($current_game_genres_array as $current_genre) {
         if ($where_clause == "") {
             $where_clause = "WHERE";
@@ -3097,25 +3053,6 @@ if ($genre != "") {
         $where_clause .= " (genre LIKE '%$current_genre%') ";
     }
 }
-
-//    if ($current_game_genres_array[0]) {
-//        $where_clause = "WHERE (genre = '" . $current_game_genres_array[0] . "') ";
-
-//        if ($current_game_genres_array[1]) {
-//            $where_clause .= " OR (genre = '" . $current_game_genres_array[1] . "') ";
-
-//            if ($current_game_genres_array[2]) {
-//                $where_clause .= " OR (genre = '" . $current_game_genres_array[2] . "') ";
-
-//                if ($current_game_genres_array[3]) {
-//                    $where_clause .= " OR (genre = '" . $current_game_genres_array[3] . "') ";
-
-//                }
-//            }
-//        }
-//     }
-
-//}
 
 
 // Depending on the current game's tags, we may want to add some more possible genres to the WHERE clause 
@@ -3128,22 +3065,18 @@ $tag_to_genre_correspondence = ["wordplay" => "Wordplay",
 
 // "humor" => "Comedy",
 //"comedy" => "Humor",
-//echo 3;
+
 foreach ($current_game_tags_array as $current_tag => $uniqueness_points) {
-//    echo 0;
+
     foreach ($tag_to_genre_correspondence as $corresponding_tag => $corresponding_genre) {
-        if ($current_tag == $corresponding_tag) {
+        if ( strcasecmp($current_tag, $corresponding_tag) == 0 ) {
      //       foreach ($current_game_genres_array as $current_genre) {
      //           if $corresponding_genre == $current_game_genres_array {
             if ($where_clause == "") {
-//                echo 8;
                 $where_clause = "WHERE";
             } else {
-//                echo 9;
                 $where_clause .= " OR";
             }
-//            $where_clause .= " (genre = '" . $corresponding_genre . "')";
-
             $where_clause .= " (genre LIKE '%" . $corresponding_genre . "%')";
         }
     }
@@ -3211,7 +3144,7 @@ while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found
 //        echo "<br> * Compare current genre ($current_genre)...";
         foreach ($found_genres_array as $found_genre) {
 //            echo "...to found genre ($found_genre) ";
-            if ($current_genre == $found_genre) {
+            if ( strcasecmp($current_genre, $found_genre) == 0 ) {
 //             echo "THIS GENRE IS A MATCH<br>";
                 // Does this next line actually work?
                 $matched_genres_array[] = $found_genre;
@@ -3235,7 +3168,7 @@ while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found
 //        echo '<br><br>current_tag is ' . $current_tag;
         foreach ($found_tags_array as $found_tag) {
 //            echo '<br><br>found_tag is ' . $found_tag;
-            if ($current_tag == $found_tag) {
+            if ( strcasecmp($current_tag, $found_tag) == 0 ) {
 //              echo "Matched tag: $current_tag = $found_tag";
                 $matched_tags_array[] = $found_tag;
 //                  $matched_tags_array[$found_tag] = $uniqueness_points;
