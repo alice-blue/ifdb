@@ -3170,44 +3170,41 @@ while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found
 }
 //  echo "<br><br>Matched Genres Array is " . json_encode($matched_genres_array) . "<br>";
 
-    // Check for tag matches
-    $matched_tags_array = [];
-    foreach ($current_game_tags_array as $current_tag => $uniqueness_points) {
-//        echo '<br><br>current_tag is ' . $current_tag;
-        foreach ($found_tags_array as $found_tag) {
-//            echo '<br><br>found_tag is ' . $found_tag;
-            if ( strcasecmp($current_tag, $found_tag) == 0 ) {
-//              echo "Matched tag: $current_tag = $found_tag";
-                $matched_tags_array[] = $found_tag;
-//                  $matched_tags_array[$found_tag] = $uniqueness_points;
-//                echo "<br><br>matched_tags is currently " . var_dump($matched_tags_array);
-                $match_score = $match_score + $uniqueness_points;
-//                echo "<br><br>MATCH SCORE IS NOW $match_score";
-                break;
-            }
+// Check for tag matches, and increase the match score based on the tag's uniqueness.
+$matched_tags_array = [];
+foreach ($current_game_tags_array as $current_tag => $uniqueness_points) {
+    foreach ($found_tags_array as $found_tag) {
+        if ( strcasecmp($current_tag, $found_tag) == 0 ) {
+//        echo "Matched tag: $current_tag = $found_tag";
+            $matched_tags_array[] = $found_tag;
+            $match_score = $match_score + $uniqueness_points;
+//            echo "<br><br>MATCH SCORE IS NOW $match_score";
+            break;
         }
     }
-    if ($match_score >= 1) {
-       // This game is similar in some way to the current game, 
-       // so add it to the list of game matches   
-       $matched_game = [];
-       $matched_game["score"] = $match_score;
-       $matched_game["gameid"] = $found_gameid;
-       $matched_game["title"] = $found_title;
-       $matched_genres_string = "";
-       $matched_genres_string = implode(", ", $matched_genres_array);
-//       echo "<br>Matched genres string is $matched_genres_string <br>";
-        if ($matched_genres_string != "") {
-           $matched_game["matched_genres"] = $matched_genres_string;
-//           echo " D. " . $matched_game["matched_genres"];
-       }
-       $matched_tags_string = implode(", ", $matched_tags_array);
-       if ($matched_tags_string != "") {
-           $matched_game["matched_tags"] = $matched_tags_string;
-       }
-       $game_matches[] = $matched_game;
-   }
 }
+if ($match_score >= 1) {
+    // This game is similar in some way to the current game, 
+    // so add it to the list of game matches   
+    $matched_game = [];
+    $matched_game["score"] = $match_score;
+    $matched_game["gameid"] = $found_gameid;
+    $matched_game["title"] = $found_title;
+
+    $matched_genres_string = "";
+    $matched_genres_string = implode(", ", $matched_genres_array);
+//       echo "<br>Matched genres string is $matched_genres_string <br>";
+    if ($matched_genres_string != "") {
+        $matched_game["matched_genres"] = $matched_genres_string;
+     }
+
+    $matched_tags_string = implode(", ", $matched_tags_array);
+    if ($matched_tags_string != "") {
+        $matched_game["matched_tags"] = $matched_tags_string;
+    }
+    $game_matches[] = $matched_game;
+}
+} // Where does this bracket go?
 
 // Sort game matches by score, with the highest score first
 function sortByScore($a, $b) {
