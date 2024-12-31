@@ -2990,7 +2990,7 @@ if (count($inrefs) != 0 && !$historyView) {
         // "ignore" list
         foreach ($tags_to_ignore as $ignored_tag) {
             if ( strcasecmp($current_tag, $ignored_tag) == 0) {
-                $exclude_current_tag = true ;
+                $exclude_current_tag = true;
                 break;
             }
         }
@@ -3055,8 +3055,8 @@ if ($genre != "") {
 }
 
 
-// Depending on the current game's tags, we may want to add some more possible genres to the WHERE clause 
-// so that we can compare with those games, too
+// Depending on the current game's tags, we may want to add some more possible genres 
+// to the WHERE clause so that we can compare with those games, too
 
 $tag_to_genre_correspondence = ["wordplay" => "Wordplay",
                                 "mythology" => "Mythological",
@@ -3066,17 +3066,18 @@ $tag_to_genre_correspondence = ["wordplay" => "Wordplay",
 // "humor" => "Comedy",
 //"comedy" => "Humor",
 
+// Look through the tags on the current game
 foreach ($current_game_tags_array as $current_tag => $uniqueness_points) {
-
+    // See if any of the tags on the current game require further action
     foreach ($tag_to_genre_correspondence as $corresponding_tag => $corresponding_genre) {
         if ( strcasecmp($current_tag, $corresponding_tag) == 0 ) {
-     //       foreach ($current_game_genres_array as $current_genre) {
-     //           if $corresponding_genre == $current_game_genres_array {
-            if ($where_clause == "") {
-                $where_clause = "WHERE";
-            } else {
-                $where_clause .= " OR";
-            }
+//                                                                foreach ($current_game_genres_array as $current_genre) {
+//                                                                if $corresponding_genre == $current_game_genres_array {
+                 if ($where_clause == "") {
+                     $where_clause = "WHERE";
+                  } else {
+                      $where_clause .= " OR";
+                   }
             $where_clause .= " (genre LIKE '%" . $corresponding_genre . "%')";
         }
     }
