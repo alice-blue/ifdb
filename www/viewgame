@@ -3074,49 +3074,45 @@ $tag_to_genre_correspondence = ["wordplay" => "Wordplay",
 
 // Look through the tags on the current game
 foreach ($current_game_tags_array as $current_tag => $uniqueness_points) {
-    // See if any of the tags on the current game require further action
+    // See if any of the current game's tags justify including more genres in our game results
     foreach ($tag_to_genre_correspondence as $corresponding_tag => $corresponding_genre) {
         if ( strcasecmp($current_tag, $corresponding_tag) == 0 ) {
-//                                                                foreach ($current_game_genres_array as $current_genre) {
-//                                                                if $corresponding_genre == $current_game_genres_array {
-                 if ($where_clause == "") {
-                     $where_clause = "WHERE";
-                  } else {
-                      $where_clause .= " OR";
-                   }
-            $where_clause .= " (genre LIKE '%" . $corresponding_genre . "%')";
+            // A tag on the current game matches a tag in our tag-to-genre list.
+            // (I thought about trying to avoid redundant where clauses, but didn't figure out how.
+            // I guess that would go here.)
+            if ($where_clause == "") {
+                $where_clause = "WHERE";
+             } else {
+                 $where_clause .= " OR";
+             }
+             $where_clause .= " (genre LIKE '%" . $corresponding_genre . "%')";
         }
     }
 }
 
-
 echo "<br>**************************************************************************<br>";
-echo "<br>Where clause is $where_clause <br>";
+echo "<br>Where clause is '$where_clause' <br>";
 
 // Uncomment to avoid limiting results by genre:
-//  $where_clause =""; 
+// $where_clause =""; 
 
-//   $genres_for_current_game_array = explode("/",$genre);
-
-
-    $result = mysqli_execute_query($db,
-            "select distinct games.id as gameid,
-                games.title as title,
-                games.author as author,
-                games.genre as genre,
-                games.tags as tags
-            from
-                games
-            $where_clause;");
+// Fetch results for games that might be similar to the current game
+$result = mysqli_execute_query($db,
+    "select distinct games.id as gameid,
+            games.title,
+            games.author,
+            games.genre,
+            games.tags
+      from games
+      $where_clause;");
             
-//            limit 10000;");
-
+//    limit 10000;");
 
 if (!$result) throw new Exception("Error: " . mysqli_error($db));
-//$found_genres = [];
+
 $game_matches = [];
 $points_for_matched_genre = 5;
-//$points_for_matched_tag = 1;
+
 while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found_tags_string] = mysql_fetch_row($result) ) {
 //    echo "<br><br>CHECKING GAME: $found_title";
     
@@ -3124,6 +3120,8 @@ while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found
     $untrimmmed_found_genres_array = [];
     $found_genres_array = [];
     if ($found_genres_string != "") {
+        // The game we just found has a genre string. If it has commas or slashes, split 
+        // on those to get the individual genres.
         if (strpos($found_genres_string, ",") !== false) {
             $untrimmed_found_genres_array = explode(",", $found_genres_string);
         } else if (strpos($found_genres_string, "/") !== false) {
@@ -3132,7 +3130,9 @@ while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found
             $untrimmed_found_genres_array = array($found_genres_string);
         }
     }
+    // Trim any whitespace around the genres
     $found_genres_array = array_map('trim', $untrimmed_found_genres_array);
+    // Remove any duplicate genres (I'm not actually sure this is necessary)
     $found_genres_array = array_unique($found_genres_array);
 
     // Get the tags for the game we've just found
@@ -3141,10 +3141,10 @@ while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found
         $found_tags_array = explode (",", $found_tags_string);
     }
 
-    //Check to see how the current game (whose page we're on) and the found game compare
+    // Check to see how the current game (whose page we're on) compares with the found game
     $match_score = 0;
 
-    // Check for genre matches
+    // Check for genre matches. More matched genres means more points.
     $matched_genres_array = [];
     if ($genre != "") {
     foreach ($current_game_genres_array as $current_genre) {
@@ -3158,16 +3158,17 @@ while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found
                 $match_score = $match_score + $points_for_matched_genre;
                 break;
             }
-//            echo "<br><br>";
+//           echo "<br><br>";
         }   
 //        echo "<br> # of common genres: " . count($matched_genres_array);
         if ( count($matched_genres_array) >= 2) {
             // If more than one genre is matched, add an extra 10 points to the score
+            // (But do I really want to add 10 points EACH TIME?)
             $match_score = $match_score + 10;
         }
     }
-    }
-  //  echo "<br><br>Matched Genres Array is " . json_encode($matched_genres_array) . "<br>";
+}
+//  echo "<br><br>Matched Genres Array is " . json_encode($matched_genres_array) . "<br>";
 
     // Check for tag matches
     $matched_tags_array = [];
