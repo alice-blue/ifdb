@@ -3170,7 +3170,8 @@ while ([$found_gameid, $found_title, $found_author, $found_genres_string, $found
 }
 //  echo "<br><br>Matched Genres Array is " . json_encode($matched_genres_array) . "<br>";
 
-// Check for tag matches, and increase the match score based on the tag's uniqueness.
+// Check for tags that match the current game's tags. Increase the game's similarity score 
+// based on the uniqueness of the matching tag.
 $matched_tags_array = [];
 foreach ($current_game_tags_array as $current_tag => $uniqueness_points) {
     foreach ($found_tags_array as $found_tag) {
@@ -3191,6 +3192,7 @@ if ($match_score >= 1) {
     $matched_game["gameid"] = $found_gameid;
     $matched_game["title"] = $found_title;
 
+    // Put matching genres into a string with commas.
     $matched_genres_string = "";
     $matched_genres_string = implode(", ", $matched_genres_array);
 //       echo "<br>Matched genres string is $matched_genres_string <br>";
@@ -3198,21 +3200,28 @@ if ($match_score >= 1) {
         $matched_game["matched_genres"] = $matched_genres_string;
      }
 
+    // Put matching tags into a string with commas.
     $matched_tags_string = implode(", ", $matched_tags_array);
     if ($matched_tags_string != "") {
         $matched_game["matched_tags"] = $matched_tags_string;
     }
+
+    // Now that we've added all the relevant info for this game, 
+    // put this game with the other matched games.
     $game_matches[] = $matched_game;
 }
-} // Where does this bracket go?
+} // Where does this bracket go????
 
-// Sort game matches by score, with the highest score first
+// Sort game matches by their similarity to the current game, 
+// with the highest similarity score first
+
 function sortByScore($a, $b) {
     return $b['score'] - $a['score'];
 }
 
 usort($game_matches, 'sortByScore');
 
+// Display the list of similar games
 $displayed_matches = 0;
 $max_matches = 30;
 foreach ($game_matches as $match) {
