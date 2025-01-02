@@ -42,56 +42,15 @@ include_once "dbconnect.php";
 $db = dbConnect();
 
 
-// presume the default layout preferences: show off-site reviews with
-// summaries in the Editorial Review section
-$offsiteMode = 'A';
-
-// if we're logged in, get the user's miscellaneous layout preferences
-if ($curuser) {
-    $result = mysqli_execute_query($db,
-        "select offsite_display from users where id = ?", [$curuser]);
-    if (mysql_num_rows($result) != 0)
-        list($offsiteMode) = mysql_fetch_row($result);
-
-    // if it's not set, default to 'A'
-    if (strlen($offsiteMode) != 1 || strpos("ABLN", $offsiteMode) === false)
-        $offsiteMode = 'A';
-}
-
-
-
-
-
-
-
 
 // ------------------------------------------------------------------------
-// get the game ID - it can be given as an IFID via ?ifid=xxx, or as an
-// internal ID via ?id=xxx
+// get the game's TUID ID, given via ?id=xxx
 function getID() {
     global $db, $errMsg, $errCode;
 
     $id = false;
-    if (isset($_REQUEST['ifid'])) {
-        // We have an IFID - look up our corresponding internal ID.  Note
-        // that letters in IFIDs are always upper-case; we store them in
-        // the database this way, so capitalize the request string before
-        // looking it up.
-        $qifid = strtoupper($_REQUEST['ifid']);
-        $result = mysqli_execute_query($db, "select gameid from ifids
-            where ifid = ?", [$qifid]);
-
-        // make sure we found a match
-        if (mysql_num_rows($result) == 0) {
-            $errMsg = "No game was found matching the requested IFID.";
-            $errCode = "notFound";
-            return null;
-        }
-
-        // get the ID from the record
-        $id = mysql_result($result, 0, "gameid");
-    } else if (isset($_REQUEST['id'])) {
-        // there's no IFID, so use the internal ID number
+    if (isset($_REQUEST['id'])) {
+        // get the TUID
         $id = $_REQUEST['id'];
     }
 
@@ -133,7 +92,7 @@ function init()
 init();
 
 // load the game information
-$reqVersion = $_REQUEST['version'] ?? null;
+//$reqVersion = $_REQUEST['version'] ?? null;
 if (!$errMsg) {
     list($ifids, $title, $author, $authorExt,
          $pubYear, $pubFull, $license,
@@ -172,7 +131,7 @@ if ($errCode == "notFound") {
     header("HTTP/1.1 400 Bad Request");
 }
 
-
+echo $errMsg;
    
     
 
@@ -203,16 +162,6 @@ pageHeader("Games with genres and tags in common with $title", false, false,
            $extraHead, true);
 
          
-
-// check for a game specified by IFID and not found
-// if (is_null(getID()) && get_req_data('ifid') != "") {
-if ( is_null(getID()) ) {
-
-    echo "No game id was found.";  // This doesn't work
-   
-    }
-
-    
 
 
 
