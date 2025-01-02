@@ -131,7 +131,7 @@ if ($errCode == "notFound") {
     header("HTTP/1.1 400 Bad Request");
 }
 
-echo $errMsg;
+
    
     
 
@@ -161,8 +161,13 @@ echo $errMsg;
 pageHeader("Games with genres and tags in common with $title", false, false,
            $extraHead, true);
 
-         
-
+if ($errMsg) {         
+    echo $errMsg;
+} else {
+    echo "<br>";
+    echo "<h1>Games similar to <i>$title</i></h1>";
+    echo "<p>The following games have genres or tags in common with <i>$title</i>:</p>";
+}
 
 
 //***
@@ -191,9 +196,11 @@ $result = mysqli_execute_query($db,
 
 $tag_frequency_divisor = 0;
 
+echo "<details><summary>Tag details</summary>";
+
 while ([$current_tag, $current_tag_frequency] = mysql_fetch_row($result)) {
     $exclude_current_tag = false;
-    echo "<br><br><strong>CURRENT TAG:</strong> $current_tag<br>Frequency in database: $current_tag_frequency";
+    echo "<br><br><strong>TAG:</strong> $current_tag<br>Frequency in database: $current_tag_frequency";
 
     // Check to see if the current tag exactly matches any tags on our 
     // "ignore" list
@@ -299,8 +306,10 @@ foreach ($current_game_tags_array as $current_tag => $uniqueness_points) {
     }
 }
 
-echo "<br>**************************************************************************<br>";
+
 echo "<br>Where clause is '$where_clause' <br>";
+
+echo "</details>";
 
 // Uncomment to avoid limiting results by genre:
 // $where_clause =""; 
