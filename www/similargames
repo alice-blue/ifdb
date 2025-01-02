@@ -60,6 +60,11 @@ if ($curuser) {
 
 
 
+
+
+
+
+
 // ------------------------------------------------------------------------
 // get the game ID - it can be given as an IFID via ?ifid=xxx, or as an
 // internal ID via ?id=xxx
@@ -172,37 +177,38 @@ if ($errCode == "notFound") {
     
 
 
-    $result = mysqli_execute_query($db,
-        "select
-           tag,
-           cast(sum(gameid = ?) as int) as tagcnt,
-           count(distinct gameid) as gamecnt
-         from gametags
-         where tag in (select tag from gametags where gameid = ?)
-         group by tag", [$ifdb_section['tuid'], $ifdb_section['tuid']]);
+ //   $result = mysqli_execute_query($db,
+ //       "select
+ //          tag,
+ //          cast(sum(gameid = ?) as int) as tagcnt,
+ //          count(distinct gameid) as gamecnt
+  //       from gametags
+ //        where tag in (select tag from gametags where gameid = ?)
+ //        group by tag", [$ifdb_section['tuid'], $ifdb_section['tuid']]);
 
-    $tagInfo = [];
-    while ([$tag, $tagCnt, $gameCnt] = mysql_fetch_row($result)) {
-        $tagInfo[] = [
-            'name' => $tag,
-            'tagcnt' => $tagCnt,
-            'gamecnt' => $gameCnt,
-        ];
-    }
+ //   $tagInfo = [];
+ //   while ([$tag, $tagCnt, $gameCnt] = mysql_fetch_row($result)) {
+ //       $tagInfo[] = [
+ //           'name' => $tag,
+ //           'tagcnt' => $tagCnt,
+ //           'gamecnt' => $gameCnt,
+ //       ];
+ //   }
 
    
 
 
 
-pageHeader("$title - Details", false, false,
+pageHeader("Games with genres and tags in common with $title", false, false,
            $extraHead, true);
-initReviewVote();
+
+         
 
 // check for a game specified by IFID and not found
-if (is_null(getID()) && get_req_data('ifid') != "") {
+// if (is_null(getID()) && get_req_data('ifid') != "") {
+if ( is_null(getID()) ) {
 
-    // check for a title in the request; if it's there, try searching for
-    // matches based on the title
+    echo "No game id was found.";  // This doesn't work
    
     }
 
