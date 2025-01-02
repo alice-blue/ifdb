@@ -845,43 +845,8 @@ if (isset($_REQUEST['ifiction']) || $json)
         }
     }
         
-    if ($links) {
-        // load the translation table for the file formats
-        $result = mysqli_execute_query($db,
-            "select id, externid from filetypes");
-        $fmtMap = [];
-        while ([$id, $ext] = mysql_fetch_row($result)) {
-            $fmtMap[$id] = $ext;
-        }
-        $links_section = [];
-        $ifdb_section['downloads'] = ['links' => &$links_section];
-        foreach ($links as $l) {
-            $link_obj = [
-                'url' => $l['url'],
-            ];
-            [$isGameLink, $onlineInterpreterType, $playOnlineURL] = constructPlayOnlineURL($l);
-            if ($isGameLink && $playOnlineURL) $link_obj['playOnlineUrl'] = $playOnlineURL;
-            if ($l['title']) $link_obj['title'] = $l['title'];
-            if ($l['desc']) $link_obj['desc'] = $l['desc'];
-            if ($l['isgame']) $link_obj['isGame'] = true;
-            if ($l['fmtexternid']) $link_obj['format'] = $l['fmtexternid'];
-            if (isset($l['osext'])) {
-                if (isset($l['osvsn'])) {
-                    $link_obj['os'] = $l['osext'] . "." . $l['osvsnext'];
-                } else {
-                    $link_obj['os'] = $l['osext'] . ".";
-                }
-            }
-            if ($l['compression']) $link_obj['compression'] = $fmtMap[$l['compression']];
-            if ($l['compressedprimary']) $link_obj['compressedPrimary'] = $l['compressedprimary'];
-
-            if ($json) {
-                $links_section[] = $link_obj;
-            } else {
-                $links_section[] = ['link' => $link_obj];
-            }
-        }
-    }
+    
+    
     if (!$should_hide) {
         $ifdb_section['averageRating'] = $ratingAvg;
         [$stars] = roundStars($ratingAvg);
@@ -927,66 +892,6 @@ if (isset($_REQUEST['ifiction']) || $json)
     exit();
 }
 
-// start the page
-$extraHead = scriptSrc('/viewgame.js', true);
-if ($should_hide) {
-    $extraHead .= "<meta name=\"robots\" content=\"noindex\">";
-}
-
-if (!$errCode) {
-    // add Open Graph elements
-    $extraHead .= "<meta property=\"og:site_name\" content=\"IFDB\" />";
-    $extraHead .= "<meta property=\"og:type\" content=\"website\" />";
-    $extraHead .= "<meta property=\"og:url\" content=\"";
-    $extraHead .= get_root_url() . "viewgame?id=$id\" />";
-    $extraHead .= "<meta property=\"og:title\" content=\"".strip_tags($title)."\" />";
-    if(!isEmpty($desc)) {
-        $extraHead .= "<meta property=\"og:description\" content=\"".strip_tags($desc)."\" />";
-    }
-    if ($hasart) {
-        $extraHead .= "<meta property=\"og:image\" content=\"";
-        $extraHead .= get_root_url() . "coverart?id=$id&amp;version=$pagevsn\"/>";
-    }
-
-    $extraHead .= "<link rel=\"canonical\" href=\"";
-    $extraHead .= get_root_url() . "viewgame?id=$id\" />";
-}
-
-global $nonce;
-$extraHead .= "
-<script type=\"text/javascript\" nonce=\"$nonce\">
-function checkReadMoreSections() {
-    const windowHeight = window.outerHeight ?
-        Math.min(window.innerHeight, window.outerHeight)
-        : window.innerHeight;
-    document.querySelectorAll('.readMore').forEach(section => {
-        const expand = section.querySelector('.expand');
-        if (!section.style.maxHeight && section.scrollHeight > windowHeight * 0.8) {
-            expand.style.display = 'block';
-        } else {
-            expand.style.display = '';
-        }
-    })
-}
-
-addEventListener('resize', checkReadMoreSections);
-
-addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.readMore').forEach(section => {
-        const expand = section.querySelector('.expand');
-        const button = expand.querySelector('button');
-        button.addEventListener('click', () => {
-            expand.style.display = '';
-            section.style.maxHeight = section.scrollHeight + 'px';
-            section.addEventListener('transitionend', () => {
-                section.style.maxHeight = 'max-content';
-            });
-        });
-    });
-    checkReadMoreSections();
-})
-</script>
-";
 
 pageHeader("$title - Details", false, false,
            $extraHead, true);
@@ -997,84 +902,10 @@ if (is_null(getID()) && get_req_data('ifid') != "") {
 
     // check for a title in the request; if it's there, try searching for
     // matches based on the title
-    $title = get_req_data('title');
-    if ($title != "") {
-        $qtitle = mysql_real_escape_string($title, $db);
-        $result = mysql_query(
-            "select
-                id, title, author from games
-             where
-                title like '$qtitle'
-                or match (title) against ('$qtitle' in boolean mode)
-             order by
-                if (title like '$qtitle', 0, 1),
-                match (title) against ('$qtitle' in boolean mode) desc
-             limit 0, 3", $db);
-        $titleSearch = mysqli_fetch_all($result, MYSQL_ASSOC);
+   
     }
 
-    ?>
-
-    <h1>This IFID is not in the database</h1>
-
-    <p>IFDB doesn't have a listing matching the <?php
-echo helpWinLink("help-ifid", "IFID");
-    ?>
-    "<?php echo htmlspecialcharx(get_req_data('ifid')) ?>."  This
-    could mean one of several things:
-
-    <ul class=doublespace>
-       <li><b>The game is listed in the database, but this IFID hasn't
-       been entered for it yet.</b>
-       <?php
-           if (count($titleSearch) != 0) {
-               echo "Here";
-               if (count($titleSearch) == 1)
-                   echo "'s a possible match";
-               else
-                   echo " are some possible matches";
-               echo " based on the title:<ul>";
-               foreach ($titleSearch as $t) {
-                   $sid = $t['id'];
-                   $stitle = htmlspecialcharx($t['title']);
-                   $sauthor = htmlspecialcharx($t['author']);
-                   echo "<li><a href=\"viewgame?id=$sid\">$stitle</a>, "
-                       . "by $sauthor";
-               }
-               echo "</ul>If ";
-               if (count($titleSearch) == 1)
-                   echo "this isn't";
-               else
-                   echo "none of these are";
-               echo " the game you're looking for, you can try a "
-                   . "<a href=\"search\">full search</a> ";
-           } else {
-               echo "You can try <a href=\"search\">"
-                   . "searching for the game</a> ";
-           }
-       ?>
-       by title or author to see if it's listed.
-
-       <p>If you do find an existing listing,
-       you can help us improve IFDB by editing the listing and adding
-       the missing IFID - just click "Edit this page" at the bottom of
-       the game's page.
-
-       <li><b>The game isn't listed yet.</b>  If you search for it and can't
-       find it, it's probably not in the database.  You can help out
-       by <a href="editgame?id=new">adding a new listing</a> for the game.
-       (You don't have to be the game's author to do this - anyone can
-       add a listing.)
-
-       <li><b>The IFID might have been entered incorrectly.</b>  If you entered
-       the IFID by hand, please double-check that it's correct.
-    </ul>
-
-    <?php
-} else if ($errMsg) {
-    echo "<font color=red><b>Error: $errMsg</b></font>";
-}
-
+    
 
 
 
