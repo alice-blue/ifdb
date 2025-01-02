@@ -120,16 +120,16 @@ if (!$errMsg) {
 }
 
 
-if ($errCode == "notFound") {
-    checkRedirect($id);
-    header("HTTP/1.1 404 Not Found");
-} else if ($errCode == "versionNotFound") {
-    header("HTTP/1.1 404 Not Found");
-} else if ($errCode == "dbError") {
-    header("HTTP/1.1 500 Internal Server Error");
-} else if ($errCode == "badRequest") {
-    header("HTTP/1.1 400 Bad Request");
-}
+//if ($errCode == "notFound") {
+//    checkRedirect($id);
+//    header("HTTP/1.1 404 Not Found");
+//} else if ($errCode == "versionNotFound") {
+//    header("HTTP/1.1 404 Not Found");
+//} else if ($errCode == "dbError") {
+//    header("HTTP/1.1 500 Internal Server Error");
+//} else if ($errCode == "badRequest") {
+//    header("HTTP/1.1 400 Bad Request");
+//}
 
 
    
@@ -171,7 +171,7 @@ if ($errMsg) {
 
 
 //***
-//------------------------ FIND SIMILAR GAMES --------------------------
+//------------------------ EVALUATE TAGS FOR CURRENT GAME--------------------------
 
 
 // Tags to ignore for matching purposes because they're not very helpful
@@ -195,12 +195,16 @@ $result = mysqli_execute_query($db,
      ORDER BY tag_frequency DESC", [$id]);
 
 $tag_frequency_divisor = 0;
+$frequency_buckets = 4;
 
-echo "<details><summary>Tag details</summary>";
+echo "<details><summary>Tag scoring details</summary>";
+echo "Number of frequency buckets: $frequency_buckets";
+//echo "<ol>";
 
 while ([$current_tag, $current_tag_frequency] = mysql_fetch_row($result)) {
     $exclude_current_tag = false;
-    echo "<br><br><strong>TAG:</strong> $current_tag<br>Frequency in database: $current_tag_frequency";
+    echo "<p>";
+    echo '<strong>TAG:</strong> "' . $current_tag . '"<br>Frequency in database: ' . $current_tag_frequency;
 
     // Check to see if the current tag exactly matches any tags on our 
     // "ignore" list
@@ -233,18 +237,19 @@ while ([$current_tag, $current_tag_frequency] = mysql_fetch_row($result)) {
         // relative frequency (from 0 to 4) for each tag. We'll use that to 
         // calculate a uniqueness score on a scale of 1 to 5.
         if ($tag_frequency_divisor == 0) {
-            $tag_frequency_divisor = round( ($current_tag_frequency/4), 2);
+            $tag_frequency_divisor = round( ($current_tag_frequency/ ($frequency_buckets - 1)), 2);
         }
         echo "<br> Dividing by $tag_frequency_divisor";
         $relative_tag_frequency = round($current_tag_frequency / $tag_frequency_divisor);
-        echo "<br>Relative tag freq (scale of 0 to 4): $relative_tag_frequency";
-        $uniqueness_points = (-$relative_tag_frequency + 5);
+        echo "<br>Relative tag frequency (on a scale of 0 to " . ($frequency_buckets-1) . "): $relative_tag_frequency";
+        $uniqueness_points = (-$relative_tag_frequency + $frequency_buckets);
         echo "<br>Uniqueness points: $uniqueness_points<br>";
         $current_game_tags_array[$current_tag] = $uniqueness_points;
 //              print_r($current_game_tags_array);
     } else {
         echo '<br>Ignoring tag "' . $current_tag . '"<br>';
     }
+    echo "</p><br>";
 }
 
 
@@ -253,7 +258,7 @@ while ([$current_tag, $current_tag_frequency] = mysql_fetch_row($result)) {
 // individual genres.
 $untrimmmed_current_game_genres_array = [];
 $current_game_genres_array = [];
-$where_clause = "";
+
 if ($genre != "") {
     if (strpos($genre, ",") !== false) {
         // The string contains commas, so split on those
@@ -266,18 +271,8 @@ if ($genre != "") {
     }
     // Trim any whitespace
     $current_game_genres_array = array_map('trim', $untrimmed_current_game_genres_array);
-
-    // We only want to fetch results from relevant genres, so write the
-    // WHERE clause
-    foreach ($current_game_genres_array as $current_genre) {
-        if ($where_clause == "") {
-            $where_clause = "WHERE";
-        } else {
-            $where_clause .= " OR";
-        }
-        $where_clause .= " (genre LIKE '%$current_genre%') ";
-    }
 }
+
 
 // Depending on the current game's tags, we may want to add some more possible genres 
 // to the WHERE clause so that we can compare with those games, too
@@ -287,6 +282,7 @@ $tag_to_genre_correspondence = ["wordplay" => "Wordplay",
                                 "fantasy" => "Fantasy"];
 // "humor" => "Comedy",
 //"comedy" => "Humor",
+$honorary_genres = [];
 
 // Look through the tags on the current game
 foreach ($current_game_tags_array as $current_tag => $uniqueness_points) {
@@ -296,23 +292,47 @@ foreach ($current_game_tags_array as $current_tag => $uniqueness_points) {
             // A tag on the current game matches a tag in our tag-to-genre list.
             // (I thought about trying to avoid redundant where clauses, but didn't figure out how.
             // I guess that would go here.)
-            if ($where_clause == "") {
-                $where_clause = "WHERE";
-             } else {
-                 $where_clause .= " OR";
-             }
-             $where_clause .= " (genre LIKE '%" . $corresponding_genre . "%')";
+            $honorary_genres[] = $corresponding_genre;
         }
     }
 }
 
+// Make the where clause
+    // We only want to fetch results from relevant genres, so write the
+    // WHERE clause
 
-echo "<br>Where clause is '$where_clause' <br>";
+$where_clause = "WHERE (NOT games.id='$id')";
+foreach ($current_game_genres_array as $current_genre[$i]) {
+    if ($i == 0) {
+        $where_clause .= " AND (";
+    } else {
+        $where_clause .= " OR";
+    }
+    $where_clause .= " (genre LIKE '%" . $corresponding_genre . "%')";
+}
+
+foreach ($honorary_genres as $honorary_genre) {
+    if (count($current_game_genres_array) == 0) {
+        $where_clause .= " AND (";
+    } else {
+        $where_clause .= " OR";
+    }
+    $where_clause .= " (genre LIKE '%" . $corresponding_genre . "%')";
+}
+
+if ( count($current_game_genres_array) > 0 || count($honorary_genres) > 0 ) {
+    $where_clause .= " )";
+}
+
+
 
 echo "</details>";
 
+
 // Uncomment to avoid limiting results by genre:
 // $where_clause =""; 
+
+echo "<p>Where clause:<br>$where_clause</p><br>";
 
 // Fetch results for games that might be similar to the current game
 $result = mysqli_execute_query($db,
