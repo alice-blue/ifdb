@@ -301,17 +301,18 @@ foreach ($current_game_tags_array as $current_tag => $uniqueness_points) {
     // WHERE clause
 
 $where_clause = "WHERE (NOT games.id='$id')";
-foreach ($current_game_genres_array as $current_genre[$i]) {
-    if ($i == 0) {
+foreach ($current_game_genres_array as $index => $current_genre) {
+    if ($index == 0) {
         $where_clause .= " AND (";
     } else {
         $where_clause .= " OR";
     }
-    $where_clause .= " (genre LIKE '%" . $corresponding_genre . "%')";
+    $where_clause .= " (genre LIKE '%" . $current_genre . "%')";
 }
 
 foreach ($honorary_genres as $honorary_genre) {
     if (count($current_game_genres_array) == 0) {
+        echo "count in CGGA: " . count($current_game_genres_array);
         $where_clause .= " AND (";
     } else {
         $where_clause .= " OR";
