@@ -220,79 +220,9 @@ function sendCoverArt()
     sendImage($imgdata, $fmt, $thumbnail);
 }
 
-// --------------------------------------------------------------------------
-// display the Member Review section header
-//
-function showMemberReviewsHeader($showHisto)
-{
-    global $memberReviewCnt, $ratingsView, $reviewView, $oneReviewView, $ratingAvg, $ratingCntAvg, $ratingHisto, $id, $currentUserReview, $curuser;
 
-    $heading = "Ratings and Reviews";
-    if ($ratingsView) {
-        $heading = "All Member Ratings";
-    } else if ($reviewView) {
-        $heading = "All Written Member Reviews";
-    } else if ($oneReviewView) {
-        $heading = "Review";
-    }
-
-    // start the section
-    echo "<a name='memberReviews'></a>"
-        . "<h2>$heading</h2><div class=indented>";
-
-    // count the ratings in the histogram, and get the maximum
-    for ($cnt = $max = 0, $i = 1 ; $i <= 5 ; $i++) {
-        $cur = $ratingHisto[$i];
-        $cnt += $cur;
-        if ($cur > $max)
-            $max = $cur;
-    }
-
-    // show the histogram if desired
-    if ($showHisto && $cnt > 1) {
-        global $nonce;
-        echo "<style nonce='$nonce'>\n"
-            . ".viewgame__histogramEnd { padding-left: 2em; }\n"
-            . "</style>\n";
-        echo "<table border=0 cellspacing=0 cellpadding=0><tr valign=top>"
-            . "<td valign=top>"
-            . "<table class=ratingHistogram border=0 cellspacing=0 cellpadding=0>";
-
-        // show the histogram
-        for ($i = 5 ; $i >= 1 ; $i--) {
-            $num = $ratingHisto[$i];
-            $pct = (int)($num*100 / $max);
-            echo "<tr><td>$i&nbsp;star:</td>"
-                . "<td><div class=ratingHistoBox>"
-                . "<div class='ratingHistoBar ratingHistoBar$i'>"
-                . "<style nonce='$nonce'>\n"
-                . ".ratingHistoBar$i { width: $pct%; }\n"
-                . "</style>\n"
-                . "</div></div></td>"
-                . "<td align=right>($num)</td></tr>";
-        }
-
-        echo "</table></td><td class=\"viewgame__histogramEnd\" valign=top>";
-        echo "<div class=details>Average Rating: "
-            . showStars($ratingAvg)
-            . " based on $ratingCntAvg ratings<br>"
-            . "Number of Reviews Written by IFDB Members: $memberReviewCnt<br></div>";
-    }
-
-    if ($currentUserReview || !$oneReviewView) {
-        echo "<div class=details><a href=\"review?id=$id&userid=$curuser\">"
-            . ($currentUserReview ? "Revise your review" : "Write a review")
-            . "</a>"
-            . "</div>";
-    }
-
-    // finish the histogram table if applicable
-    if ($showHisto) {
-        echo "</td></tr></table>";
-    }
-}
-
-
+    
+ 
 // initialize - this fetches the database record for the game we're
 // being asked to display
 function init()
