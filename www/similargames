@@ -29,27 +29,10 @@ if ($curuser) {
 
 $errMsg = false;
 $errCode = false;
-$title = "Game Details";
-$detailView = false;
-$recView = false;
-$historyView = false;
-$reviewView = false;
-$ratingsView = false;
-$oneReviewView = false;
-$downloadsView = false;
-$myCrossRecs = 0;
+$title = "Games with similar genres and tags";
 
-// note if we're on IE6
-$userAgent = $_SERVER['HTTP_USER_AGENT'];
-$ie6 = preg_match("/; msie 6\./i", $userAgent);
 
-// Zero-Width Space: for IE6, use &shy;, otherwise use &#8203;.  (The latter
-// is the unicode zero-width space character, which allows a line break but
-// is otherwise invisible.  &shy; is the soft hyphen, which is invisible most
-// of the time but allows a line break, and is rendered as a hyphen if the
-// renderer does elect to put a line break there.  IE6 doesn't handle the
-// unicode zwsp; the other browsers, including IE7, do.)
-$zwsp = ($ie6 ? "&shy;" : "&#8203;");
+
 
 if (isset($_REQUEST['cssOverride']))
     $cssOverride = get_req_data('cssOverride');
