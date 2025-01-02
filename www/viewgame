@@ -2965,8 +2965,8 @@ $tags_to_ignore = ["walkthrough", "cover art", "Winner of a comp", "translation 
     "Miss Congeniality Winner", "Free IF Playoffs", "Let's Play", "game doesn't exist"];
 
 // If a tag includes any of these strings, ignore it for matching purposes
-$tag_strings_to_ignore = ["IFComp", "ifcomp", "Spring Thing", "Interactive Fiction Top 50", 
-    "transcript", "source", "IF Comp", "Xyzzy Awards", "Best Game", "ParserComp ", 
+$tag_strings_to_ignore = ["IFComp", "IF Comp", "Spring Thing", "Interactive Fiction Top 50", 
+    "transcript", "source", "Xyzzy Awards", "Best Game", "ParserComp ", 
     "Text Adventure Literacy Jam ", "Jay is games"];
 
 // Get tags for the current game
@@ -3022,7 +3022,7 @@ while ([$current_tag, $current_tag_frequency] = mysql_fetch_row($result)) {
         echo "<br> Dividing by $tag_frequency_divisor";
         $relative_tag_frequency = round($current_tag_frequency / $tag_frequency_divisor);
         echo "<br>Relative tag freq (scale of 0 to 4): $relative_tag_frequency";
-        $uniqueness_points = (-$tag_frequency_scaled_down + 5);
+        $uniqueness_points = (-$relative_tag_frequency + 5);
         echo "<br>Uniqueness points: $uniqueness_points<br>";
         $current_game_tags_array[$current_tag] = $uniqueness_points;
 //              print_r($current_game_tags_array);
