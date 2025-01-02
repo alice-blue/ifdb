@@ -174,13 +174,13 @@ if ($errMsg) {
 
 
 // Tags to ignore for matching purposes because they're not very helpful
-$tags_to_ignore = ["walkthrough", "cover art", "Winner of a comp", "translation available",
-    "Miss Congeniality Winner", "Free IF Playoffs", "Let's Play", "game doesn't exist"];
+$tags_to_ignore = ["walkthrough", "cover art", "Adrift", "Twine", "Harlowe", "Adventuron", "Z-code", "Glulx", "Winner of a comp", "translation available",
+    "Miss Congeniality Winner", "Free IF Playoffs", "Let's Play", "game doesn't exist", "XYZZY response"];
 
 // If a tag includes any of these strings, ignore it for matching purposes
-$tag_strings_to_ignore = ["IFComp", "IF Comp", "Spring Thing", "Interactive Fiction Top 50", 
+$tag_strings_to_ignore = ["Inform", "TADS", "IFComp", "IF Comp", "Spring Thing", "Interactive Fiction Top 50", 
     "transcript", "source", "Xyzzy Awards", "Best Game", "ParserComp ", 
-    "Text Adventure Literacy Jam ", "Jay is games"];
+    "Text Adventure Literacy Jam ", "Jay Is Games"];
 
 // Get tags for the current game
 $current_game_tags_array = [];
@@ -194,7 +194,7 @@ $result = mysqli_execute_query($db,
      ORDER BY tag_frequency DESC", [$id]);
 
 $tag_frequency_divisor = 0;
-$frequency_buckets = 4;
+$frequency_buckets = 5;
 
 echo "<details><summary>Tag scoring details</summary>";
 echo "Number of frequency buckets: $frequency_buckets";
