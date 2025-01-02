@@ -174,11 +174,10 @@ if ($errMsg) {
 
 
 // Tags to ignore for matching purposes because they're not very helpful
-$tags_to_ignore = ["walkthrough", "cover art", "Adrift", "Twine", "Harlowe", "Adventuron", "Z-code", "Glulx", "Winner of a comp", "translation available",
-    "Miss Congeniality Winner", "Free IF Playoffs", "Let's Play", "game doesn't exist", "XYZZY response"];
+$tags_to_ignore = ["walkthrough", "cover art", "Adrift", "Twine", "Harlowe", "Adventuron", "Z-code", "Glulx", "Winner of a comp", "translation available", "Miss Congeniality Winner", "Free IF Playoffs", "Let's Play", "game doesn't exist", "XYZZY response"];
 
 // If a tag includes any of these strings, ignore it for matching purposes
-$tag_strings_to_ignore = ["Inform", "TADS", "IFComp", "IF Comp", "Spring Thing", "Interactive Fiction Top 50", 
+$tag_strings_to_ignore = ["Inform", "TADS", "IFComp", "IF Comp", "Comp", "Spring Thing", "Interactive Fiction Top 50", 
     "transcript", "source", "Xyzzy Awards", "Best Game", "ParserComp ", 
     "Text Adventure Literacy Jam ", "Jay Is Games"];
 
@@ -208,23 +207,28 @@ while ([$current_tag, $current_tag_frequency] = mysql_fetch_row($result)) {
     // Check to see if the current tag exactly matches any tags on our 
     // "ignore" list
     foreach ($tags_to_ignore as $ignored_tag) {
-        if ( strcasecmp($current_tag, $ignored_tag) == 0) {
+        if ( strcasecmp($current_tag, $ignored_tag ) == 0) {
             // This tag is on the "ignore" list, so exclude it
+            echo 7;
             $exclude_current_tag = true;
             break;
         }
+
     }
 
     // If we haven't excluded the tag yet, check to see if it
     // includes any strings that mean this tag should be ignored
     if ($exclude_current_tag == false) {
-        foreach ($tag_strings_to_ignore as $ignored_string) {
-            if (strpos($current_tag, $ignored_string) !== false) {
+        foreach ($tag_strings_to_ignore as $tag_string) {
+            if (strpos($current_tag, $tag_string) !== false) {
+//    This doesn't work until PHP 8        if ( str_contains($lowercase_tag, $string_to_ignore) ) {
                 $exclude_current_tag = true;
+                echo "^^";
                 break;
              }
          }
     }
+
 
     // If we're not ignoring the current tag, add it to the list for comparison
     // with other games
@@ -240,7 +244,7 @@ while ([$current_tag, $current_tag_frequency] = mysql_fetch_row($result)) {
         }
         echo "<br> Dividing by $tag_frequency_divisor";
         $relative_tag_frequency = round($current_tag_frequency / $tag_frequency_divisor);
-        echo "<br>Relative tag frequency (on a scale of 0 to " . ($frequency_buckets-1) . "): $relative_tag_frequency";
+        echo "<br>Relative tag frequency (on a scale of 0 to " . ($frequency_buckets - 1) . "): $relative_tag_frequency";
         $uniqueness_points = (-$relative_tag_frequency + $frequency_buckets);
         echo "<br>Uniqueness points: $uniqueness_points<br>";
         $current_game_tags_array[$current_tag] = $uniqueness_points;
@@ -296,9 +300,8 @@ foreach ($current_game_tags_array as $current_tag => $uniqueness_points) {
     }
 }
 
-// Make the where clause
-    // We only want to fetch results from relevant genres, so write the
-    // WHERE clause
+// We only want to fetch results from relevant genres, so write the
+// WHERE clause
 
 $where_clause = "WHERE (NOT games.id='$id')";
 foreach ($current_game_genres_array as $index => $current_genre) {
