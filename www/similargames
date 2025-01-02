@@ -29,7 +29,6 @@ if ($curuser) {
 
 $errMsg = false;
 $errCode = false;
-$title = "Games with similar genres and tags";
 
 
 
@@ -165,7 +164,7 @@ if ($errMsg) {
     echo $errMsg;
 } else {
     echo "<br>";
-    echo "<h1>Games similar to <i>$title</i></h1>";
+    echo "<h1>Games with genres or tags similar to <i>$title</i></h1>";
     echo "<p>The following games have genres or tags in common with <i>$title</i>:</p>";
 }
 
@@ -291,7 +290,7 @@ foreach ($current_game_tags_array as $current_tag => $uniqueness_points) {
         if ( strcasecmp($current_tag, $corresponding_tag) == 0 ) {
             // A tag on the current game matches a tag in our tag-to-genre list.
             // (I thought about trying to avoid redundant where clauses, but didn't figure out how.
-            // I guess that would go here.)
+            // I guess that would go here. It would need to be case insensitive.)
             $honorary_genres[] = $corresponding_genre;
         }
     }
