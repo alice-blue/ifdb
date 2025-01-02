@@ -170,15 +170,7 @@ if ($errCode == "notFound") {
 
    
     
-    if (!$should_hide) {
-        $ifdb_section['averageRating'] = $ratingAvg;
-        [$stars] = roundStars($ratingAvg);
-        if ($stars) {
-            $ifdb_section['starRating'] = $stars;
-        }
-        $ifdb_section['ratingCountAvg'] = $ratingCntAvg;
-        $ifdb_section['ratingCountTot'] = $ratingCntTot;
-    }
+
 
     $result = mysqli_execute_query($db,
         "select
