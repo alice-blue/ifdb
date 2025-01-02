@@ -59,12 +59,6 @@ if (isset($_REQUEST['cssOverride']))
 include_once "dbconnect.php";
 $db = dbConnect();
 
-// retrieve the special reviewer names
-include_once "reviews.php";
-$specialNames = initSpecialNames($db);
-
-// cache the IF Archive mirror mapping, if any
-include "mirrorUrl.php";
 
 // presume the default layout preferences: show off-site reviews with
 // summaries in the Editorial Review section
@@ -82,19 +76,7 @@ if ($curuser) {
         $offsiteMode = 'A';
 }
 
-// ------------------------------------------------------------------------
-// get a footnote indicator for the given footnote number
-//
-function getFootnoteStar($num)
-{
-    $f = array("*", "&dagger;", "&Dagger;");
-    if ($num <= 0)
-        return "";
-    else if ($num <= count($f))
-        return $f[$num-1];
-    else
-        return str_repeat("*", 2 + $num - count($f));
-}
+
 
 // ------------------------------------------------------------------------
 // get the game ID - it can be given as an IFID via ?ifid=xxx, or as an
