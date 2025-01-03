@@ -75,11 +75,19 @@ function init()
         return;
     }
 
+    if ($curuser === false) {
+        if (!$errMsg) {
+            $errMsg = "You must be logged in to use this feature.";
+            // Do I need an error code, too?
+        }
+        return;
+    }
     // check the game ID
     $id = getID();
     if (!$id) {
         if (!$errMsg) {
-            $errMsg = "No game was specified in the request.";
+            $errMsg = "No game was specified in the request. Please enter the URL in the format<br><br>";
+            $errMsg .= "<strong>https://ifdb.org/similargames?id=ju778uv5xaswnlpl</strong><br><br>using the game's TUID as the indentifier.";
             $errCode = "badRequest";
         }
         return;
@@ -118,7 +126,7 @@ if (!$errMsg) {
 
 }
 
-
+// Do we need this?
 //if ($errCode == "notFound") {
 //    checkRedirect($id);
 //    header("HTTP/1.1 404 Not Found");
@@ -160,27 +168,36 @@ if (!$errMsg) {
 pageHeader("Games with genres and tags in common with $title", false, false,
            $extraHead, true);
 
+$frequency_buckets = 4;  // Tag frequency/uniqueness will be divided into this many categories          
+
 if ($errMsg) {         
     echo $errMsg;
 } else {
     echo "<br>";
-    echo "<h1>Games with genres or tags similar to <i>$title</i></h1>";
-    echo "<p>The following games have genres or tags in common with <i>$title</i>:</p>";
+    echo "<h1>Games with genres or tags in common with <i>$title</i></h1>";
+    echo "<details><summary><i>Evaluation and scoring details (for testing)</i></summary>";
+    echo "<p>Tag frequency is currently divided into $frequency_buckets buckets.</p>";
+    echo "<p>The game <i>$title</i> has the following tags:</p>";
 }
 
 
 //***
-//------------------------ EVALUATE TAGS FOR CURRENT GAME--------------------------
+//------------------------ VARIABLES FOR EVALUATING TAGS FOR CURRENT GAME--------------------------
 
 
 // Tags to ignore for matching purposes because they're not very helpful
-$tags_to_ignore = ["walkthrough", "cover art", "Adrift", "Twine", "Harlowe", "Adventuron", "Z-code", "Glulx", "Winner of a comp", "translation available", "Miss Congeniality Winner", "Free IF Playoffs", "Let's Play", "game doesn't exist", "XYZZY response"];
+$tags_to_ignore = ["walkthrough", "cover art", "Adrift", "Twine", "Harlowe", "Adventuron", "Z-code", 
+                   "Glulx", "Winner of a comp", "translation available", "Miss Congeniality Winner", 
+                   "Free IF Playoffs", "Let's Play", "game doesn't exist", "XYZZY response"];
 
 // If a tag includes any of these strings, ignore it for matching purposes
 $tag_strings_to_ignore = ["Inform", "TADS", "IFComp", "IF Comp", "Comp", "Spring Thing", "Interactive Fiction Top 50", 
     "transcript", "source", "Xyzzy Awards", "Best Game", "ParserComp ", 
     "Text Adventure Literacy Jam ", "Jay Is Games"];
 
+ //-----------------------------EVALUATING TAGS FOR CURRENT GAME---------------
+ 
+ 
 // Get tags for the current game
 $current_game_tags_array = [];
 $result = mysqli_execute_query($db,
@@ -192,11 +209,8 @@ $result = mysqli_execute_query($db,
      GROUP BY tag
      ORDER BY tag_frequency DESC", [$id]);
 
-$tag_frequency_divisor = 0;
-$frequency_buckets = 5;
+$tag_frequency_divisor = 0;  // It's uncalculated now, but once calculated, we'll divide each tag count by this number
 
-echo "<details><summary>Tag scoring details</summary>";
-echo "Number of frequency buckets: $frequency_buckets";
 //echo "<ol>";
 
 while ([$current_tag, $current_tag_frequency] = mysql_fetch_row($result)) {
@@ -234,15 +248,26 @@ while ([$current_tag, $current_tag_frequency] = mysql_fetch_row($result)) {
     if ($exclude_current_tag == false) {
         // Since the tag frequencies have been sorted in descending order, the first 
         // non-zero value should be the highest frequency of any pf this game's tags.
-        // Assuming we want to put the frequency in 5 buckets (though this number can 
-        // be changed), we divide the highest frequency by 4 to find our divisor. 
+        // Assuming we want to put the frequency in 4 buckets (though this number can 
+        // be changed), we divide the highest frequency by 3 to find our divisor. 
         // Then we'll divide each tag frequency by this divisor and round so that we'll 
         // end up with a relative frequency (from 0 to 4) for each tag. We'll use that to 
+        // calculate a "uniqueness score" for that tag on a scale of 1 to 4.
+
+ // Assuming we want to put the frequency in 5 buckets (though this number can 
+        // Divide the highest frequency by 4 to find our divisor. Then we'll divide 
+        // be changed), we divide the highest frequency by 4 to find our divisor. 
+        // each tag frequency by this divisor and round so that we'll end up with a 
+        // Then we'll divide each tag frequency by this divisor and round so that we'll 
+        // relative frequency (from 0 to 4) for each tag. We'll use that to 
+        // end up with a relative frequency (from 0 to 4) for each tag. We'll use that to 
+        // calculate a uniqueness score on a scale of 1 to 5.
         // calculate a "uniqueness score" for that tag on a scale of 1 to 5.
+**
         if ($tag_frequency_divisor == 0) {
             $tag_frequency_divisor = round( ($current_tag_frequency/ ($frequency_buckets - 1)), 2);
-        }
-        echo "<br>Dividing by $tag_frequency_divisor";
+            echo "<br> Dividing tag frequency by $tag_frequency_divisor";
+        }        
         $relative_tag_frequency = round($current_tag_frequency / $tag_frequency_divisor);
         echo "<br>Relative tag frequency (on a scale of 0 to " . ($frequency_buckets - 1) . "): $relative_tag_frequency";
         $uniqueness_points = (-$relative_tag_frequency + $frequency_buckets);
@@ -328,16 +353,20 @@ if ( count($current_game_genres_array) > 0 || count($honorary_genres) > 0 ) {
 }
 
 
+if (!$errMsg) {
+    echo "<p>Where clause:<br>$where_clause</p><br>";
+    echo "</details>";
+}
 
-echo "</details>";
 
 
 // Uncomment to avoid limiting results by genre:
 // $where_clause =""; 
 
-echo "<p>Where clause:<br>$where_clause</p><br>";
+
 
 // Fetch results for games that might be similar to the current game
+if (!$errMsg) {
 $result = mysqli_execute_query($db,
     "select distinct games.id as gameid,
             games.title,
@@ -432,6 +461,7 @@ if ($match_score >= 1) {
     $matched_game["score"] = $match_score;
     $matched_game["gameid"] = $found_gameid;
     $matched_game["title"] = $found_title;
+    $matched_game["author"] = $found_author;
 
     // Put matching genres into a string with commas.
     $matched_genres_string = "";
@@ -463,14 +493,17 @@ function sortByScore($a, $b) {
 usort($game_matches, 'sortByScore');
 
 // Display the list of similar games
+
+echo "<p>The following games have genres or tags in common with <i>$title</i>:</p>";
 $displayed_matches = 0;
-$max_matches = 30;
+$max_matches = 10;
 foreach ($game_matches as $match) {
     $match_number = $displayed_matches + 1;
-    echo '<p><strong>MATCH #' . $match_number . ':</strong> ';
+    echo '<p><strong>GAME #' . $match_number . ':</strong> ';
     echo '<a href="https://ifdb.org/viewgame?id=' . $match['gameid'] . '">';
     echo $match['title'];
-    echo '</a>';
+    echo '</a> by ';
+    echo $match['author'];
     echo "<br>Similarity score: " . $match['score'];
     if ( isset($match['matched_genres']) ) {
         echo "<br>Matched genres: " . $match['matched_genres'];
@@ -483,6 +516,8 @@ foreach ($game_matches as $match) {
     if ($displayed_matches == $max_matches) break;
 }
 
+
+}  // if (!errMsg)
 //***
 
 
