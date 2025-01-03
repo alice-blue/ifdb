@@ -223,7 +223,6 @@ while ([$current_tag, $current_tag_frequency] = mysql_fetch_row($result)) {
             if (strpos($current_tag, $tag_string) !== false) {
 //    This doesn't work until PHP 8        if ( str_contains($lowercase_tag, $string_to_ignore) ) {
                 $exclude_current_tag = true;
-                echo "^^";
                 break;
              }
          }
@@ -235,14 +234,15 @@ while ([$current_tag, $current_tag_frequency] = mysql_fetch_row($result)) {
     if ($exclude_current_tag == false) {
         // Since the tag frequencies have been sorted in descending order, the first 
         // non-zero value should be the highest frequency of any pf this game's tags.
-        // Divide the highest frequency by 4 to find our divisor. Then we'll divide 
-        // each tag frequency by this divisor and round so that we'll end up with a 
-        // relative frequency (from 0 to 4) for each tag. We'll use that to 
-        // calculate a uniqueness score on a scale of 1 to 5.
+        // Assuming we want to put the frequency in 5 buckets (though this number can 
+        // be changed), we divide the highest frequency by 4 to find our divisor. 
+        // Then we'll divide each tag frequency by this divisor and round so that we'll 
+        // end up with a relative frequency (from 0 to 4) for each tag. We'll use that to 
+        // calculate a "uniqueness score" for that tag on a scale of 1 to 5.
         if ($tag_frequency_divisor == 0) {
             $tag_frequency_divisor = round( ($current_tag_frequency/ ($frequency_buckets - 1)), 2);
         }
-        echo "<br> Dividing by $tag_frequency_divisor";
+        echo "<br>Dividing by $tag_frequency_divisor";
         $relative_tag_frequency = round($current_tag_frequency / $tag_frequency_divisor);
         echo "<br>Relative tag frequency (on a scale of 0 to " . ($frequency_buckets - 1) . "): $relative_tag_frequency";
         $uniqueness_points = (-$relative_tag_frequency + $frequency_buckets);
