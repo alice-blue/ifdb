@@ -75,6 +75,120 @@ if (isset($_REQUEST['adminemail'])) {
     exit();
 }
 
+//***
+if (isset($_REQUEST['recentactivity'])) {
+//    $tag = $_POST['blockedtag'] ?? null;
+//    $preferredtag = $_POST['preferredtag'] ?? null;
+//    $deleteblock = $_POST['deleteblock'] ?? null;
+    pageHeader("Recent activity by all users");
+    $days=2; // how many days of activity do we want
+    $result = mysqli_execute_query($db, 
+//        'SELECT reviews.moddate AS moddatetime,
+//                DATE(reviews.moddate) AS reviewdate,
+//                reviews.userid AS reviewerid,
+//                reviews.gameid,
+//                reviews.rating,
+//                games.title AS gametitle,
+//                games.author AS gameauthor
+//        FROM reviews 
+//        LEFT JOIN games
+//        ON reviews.gameid = games.id
+//        WHERE `reviews.moddate` > DATE_SUB(NOW(), INTERVAL 90 DAY)
+//        ORDER BY moddate DESC
+//        LIMIT 5000');
+
+        'SELECT reviews.moddate AS reviewdatetime,
+                DATE(reviews.moddate) AS reviewdate,
+                reviews.userid AS reviewerid,
+                reviews.gameid,
+                reviews.rating,
+                games.title AS gametitle,
+                games.author AS gameauthor
+        FROM reviews 
+        LEFT JOIN games
+        ON reviews.gameid = games.id
+        WHERE (reviews.moddate) > DATE_SUB(NOW(), INTERVAL 100 DAY)
+        ORDER BY reviews.moddate DESC
+        LIMIT 100');
+
+//        &&
+//        SELECT column_name(s)
+//        FROM table1
+//        LEFT JOIN table2
+//        ON table1.column_name = table2.column_name;
+//        &&
+//        , [$days]);
+        
+//    if ($deleteblock) {
+//        $result = mysqli_execute_query($db, 'delete from blockedtagsynonyms where blockedtag = ?', [$tag]);
+    if ($result) {
+        echo "yay";
+        $rows = mysqli_fetch_all($result, MYSQLI_NUM);
+        echo "<h2>Recent ratings and reviews:</h2>";
+        echo "<ul>";
+        foreach ($rows as [$moddatetime, $reviewdate, $reviewer_id, $game_id, $rating]) {
+            if ($rating) {
+                echo "<li>$date: User $userid gave $gameid a rating of $rating.</li>";
+            } else {
+                echo "<li>$date: User $userid wrote a review of $gameid.</li>";
+            }                        
+        }
+//    }
+             
+//            echo "<h1>Unblock tag: ". htmlspecialcharx($tag)."</h1>\n"
+//                ."<p>Unblocked '". htmlspecialcharx($tag) . "'.</p>"
+//                ."<p><a href='/adminops?blocktag'>Block/unblock another tag</a></p>"
+               echo "<p><a href='/adminops'>Return to the System Maintenance Panel</a></p>";
+ } else {
+            error_log("error unblocking tag '$tag': " . mysqli_error($db));
+            echo "<span class=errmsg>There was an error unblocking the tag.</span>";
+        }
+//    } else if (!$tag || !$preferredtag) {
+//            $result = mysqli_query($db, 'select blockedtag, preferredtag from blockedtagsynonyms order by blockedtag');
+//            $rows = mysqli_fetch_all($result, MYSQLI_NUM);
+        ?>
+        <h1>Block tag</h1>
+        <p><form method=post>Block tag: <input type=hidden name=blocktag value=''><input name=blockedtag required>
+        <p>Preferred Tag: <input name=preferredtag required>
+        <button>Block tag</button></form></p>
+        
+        <table border=1>
+            <tr><th>Blocked Tag</th><th>Preferred Tag</th><th>Unblock?</th></tr>
+            <?php
+            foreach ($rows as [$blockedtag, $preferredtag]) {
+                echo "<tr><td>".htmlspecialcharx($blockedtag)."</td><td>".htmlspecialcharx($preferredtag)."</td><td>"
+                    . "<form method=post><input type=hidden name=deleteblock value=1>"
+                    . "<input type=hidden name=blockedtag value='".htmlspecialcharx($blockedtag)."'><button>Unblock</button></form></td></tr>\n";
+            }
+            ?>
+        </table>
+        <?php
+    } else {
+        $result = mysqli_execute_query($db, 'select distinct(id), title from games join gametags on games.id=gameid where tag = ? order by title', [$tag]);
+        $rows = mysqli_fetch_all($result, MYSQLI_NUM);
+        if (count($rows)) {
+            echo "<h1>Block tag: ". htmlspecialcharx($tag)."</h1>\n"
+                ."<p><span class=errmsg>There are ".count($rows)." games with the tag \"".htmlspecialcharx($tag)."\". <a href='/adminops?bulkdeletetag'>Delete the existing tag</a> before banning it.</span>"
+                ."<p><a href='/adminops?blocktag'>Cancel</a></p>";
+            pageFooter();
+            exit();
+        }
+        $result = mysqli_execute_query($db, "insert into blockedtagsynonyms (blockedtag, preferredtag) values (?, ?)", [$tag, $preferredtag]);
+        if ($result) {
+            echo "<h1>Block tag: ". htmlspecialcharx($tag)."</h1>\n"
+                ."<p>Blocked '". htmlspecialcharx($tag) . "'.</p>"
+                ."<p><a href='/adminops?blocktag'>Block another tag</a></p>"
+                ."<p><a href='/adminops'>Return to the System Maintenance Panel</a></p>";
+        } else {
+            error_log("error blocking tag '$tag': " . mysqli_error($db));
+            echo "<span class=errmsg>There was an error blocking the tag.</span>";
+        }
+    }
+    pageFooter();
+    exit();
+//}
+//***
+
 if (isset($_REQUEST['bulkaddtag'])) {
     $tag = $_POST['tag'] ?? null;
     $tag2 = $_POST['tag2'] ?? null;
@@ -2601,6 +2715,7 @@ function cleanutf8($str)
 <a href="adminops?cleanpix">Delete orphaned images</a><br>
 <a href="adminops?users&sortby=new">User list</a><br>
 <a href="adminops?finduser">User search</a><br>
+<a href="adminops?recentactivity">Recent activity for all users</a><br>
 <a href="adminops?adminemail">Send admin email</a><br>
 <a href="adminops?burygame">Bury game</a><br>
 <a href="adminops?bulkaddtag">Bulk add tags</a><br>
