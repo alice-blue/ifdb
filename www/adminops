@@ -94,6 +94,7 @@ if (isset($_REQUEST['recentactivity'])) {
                 reviews.gameid,
                 reviews.rating,
                 reviews.review,
+                reviews.id as reviewid,
                 games.title AS gametitle,
                 games.author AS gameauthor,
                 users.name AS reviewername
@@ -133,6 +134,13 @@ if (isset($_REQUEST['recentactivity'])) {
                 $rating = "no";
             }
             $review = $r['review'];
+            $reviewid = $r['reviewid'];
+            $rating_or_review = "";
+            if ($rating && !$review) {
+                $rating_or_review = "rating";
+            } else {
+                $rating_or_review = "review";
+            }
             $game_title = $r['gametitle'];
             $game_author = $r['gameauthor'];
 
@@ -140,11 +148,16 @@ if (isset($_REQUEST['recentactivity'])) {
                 echo "<h2>$review_date</h2>";
                 $previous_date = $review_date;
             }
-            echo "<p><a href='/showuser?id=$reviewer_id'>$reviewer_name</a> $action a $rating-star ";
-            if ($rating && !$review) {
-                echo "rating ";
+            echo "<p><a href='/showuser?id=$reviewer_id'>$reviewer_name</a> ";
+            if ($action = "added") {
+                echo "added a {$rating}-star ";
+                if ($reviewid) {
+                    echo "<a href='/viewgame?id={$gameid}&review={$reviewid}>$rating_or_review</a> ";
+                } else {
+                    echo $rating_or_review;
+                }    
             } else {
-                echo "review ";
+                echo "edited a rating or review to be a $rating-star $rating_or_review ";
             }
             echo "of <i>$game_title</i> ($game_author).</p>";
                                  
