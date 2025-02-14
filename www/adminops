@@ -81,10 +81,19 @@ if (isset($_REQUEST['recentactivity'])) {
     $days=2; // how many days of activity do we want
     $result = mysqli_execute_query($db, 
         'SELECT reviews.moddate AS reviewdatetime,
+                CASE WHEN reviews.createdate = reviews.moddate
+                     THEN "added"
+                     ELSE "modified"
+                     END AS action,
                 DATE(reviews.moddate) AS reviewdate,
+--                CASE WHEN reviews.review = null
+--                     THEN ""false
+--                     ELSE true
+--                     END AS review,
                 reviews.userid AS reviewerid,
                 reviews.gameid,
                 reviews.rating,
+                reviews.review,
                 games.title AS gametitle,
                 games.author AS gameauthor,
                 users.name AS reviewername
@@ -108,7 +117,7 @@ if (isset($_REQUEST['recentactivity'])) {
 //       $row = mysqli_fetch_assoc($result);
 //printf ("%s (%s)\n", $row["Lastname"], $row["Age"]);
        
-
+        $previous_date = 0;
         foreach ($rows as $r) {
 //            printf ("%s (%s)\n", $row["Lastname"], $row["Age"]);
             
@@ -116,15 +125,29 @@ if (isset($_REQUEST['recentactivity'])) {
             $review_date = $r['reviewdate'];
             $reviewer_id = $r['reviewerid'];
             $reviewer_name = $r['reviewername'];
-            $rating = $r['rating'];
+            $action = $r['action'];
+            $rating = "";
+            if ($r['rating']) {
+                $rating = $r['rating'];
+            } else {
+                $rating = "no";
+            }
+            $review = $r['review'];
             $game_title = $r['gametitle'];
             $game_author = $r['gameauthor'];
 
-if ($rating) {
-                echo "<li>$review_date: $reviewer_name ($reviewer_id) gave or modified a rating of $rating to <i>$game_title</i> by $game_author.</li>";
+            if ($previous_date != $review_date) {
+                echo "<h2>$review_date</h2>";
+                $previous_date = $review_date;
+            }
+            echo "<p><a href='/showuser?id=$reviewer_id'>$reviewer_name</a> $action a $rating-star ";
+            if ($rating && !$review) {
+                echo "rating ";
             } else {
-                echo "<li>$date: User $reviewer wrote or modified a review of $gameid.</li>";
-            }                        
+                echo "review ";
+            }
+            echo "of <i>$game_title</i> ($game_author).</p>";
+                                 
         }
     } else {
         echo "No activity found.";
