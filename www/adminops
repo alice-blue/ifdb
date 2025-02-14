@@ -86,10 +86,13 @@ if (isset($_REQUEST['recentactivity'])) {
                 reviews.gameid,
                 reviews.rating,
                 games.title AS gametitle,
-                games.author AS gameauthor
+                games.author AS gameauthor,
+                users.name AS reviewername
         FROM reviews 
         LEFT JOIN games
         ON reviews.gameid = games.id
+        LEFT JOIN users
+        ON reviews.userid = users.id
         WHERE (reviews.moddate) > DATE_SUB(NOW(), INTERVAL 100 DAY)
         ORDER BY reviews.moddate DESC
         LIMIT 100');
@@ -112,12 +115,13 @@ if (isset($_REQUEST['recentactivity'])) {
 //            [$reviewdatetime, $reviewdate, $reviewerid, $gameid, $rating, $gametitle, $gameauthor]) {
             $review_date = $r['reviewdate'];
             $reviewer_id = $r['reviewerid'];
+            $reviewer_name = $r['reviewername'];
             $rating = $r['rating'];
             $game_title = $r['gametitle'];
             $game_author = $r['gameauthor'];
 
 if ($rating) {
-                echo "<li>$review_date: User $reviewer_id gave or modified a rating of $rating to $game_title by $game_author.</li>";
+                echo "<li>$review_date: $reviewer_name ($reviewer_id) gave or modified a rating of $rating to <i>$game_title</i> by $game_author.</li>";
             } else {
                 echo "<li>$date: User $reviewer wrote or modified a review of $gameid.</li>";
             }                        
