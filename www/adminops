@@ -76,6 +76,17 @@ if (isset($_REQUEST['adminemail'])) {
 }
 
 //***
+// For long author and title strings, cut off the 
+// string after a set number of characters and 
+// add "..." if any characters were removed.
+function shortenString($long_string) {
+    $short_string = substr($long_string,0,50);
+    if ($short_string != $long_string) {
+        $short_string .= "...";
+    }
+    return $short_string;
+}
+
 if (isset($_REQUEST['recentactivity'])) {
     pageHeader("Recent activity by all users");
 //    $days=3; // how many days of activity do we want
@@ -121,10 +132,6 @@ if (isset($_REQUEST['recentactivity'])) {
             } else {
                 $rating = "no";
             }
-//            $review = false;
-//            if ($r['review'] != "") {
-//                $review = true;
-//            }
             $review_id = $r['reviewid'];
             $rating_or_review = "";
             if ($r['review'] != "") {
@@ -133,16 +140,8 @@ if (isset($_REQUEST['recentactivity'])) {
                 $rating_or_review = "rating";
             }
             $game_id = $r['gameid'];
-            $game_title_long = $r['gametitle'];
-            $game_title = substr($game_title_long,0,55);
-            if ($game_title != $game_title_long) {
-                $game_title .= "...";
-            }
-            $game_author_long = $r['gameauthor'];
-            $game_author = substr($game_author_long,0,55);
-            if ($game_author != $game_author_long) {
-                $game_author .= "...";
-            }
+            $game_title = shortenString($r['gametitle']);
+            $game_author = shortenString($r['gameauthor']);
             if ($review_date != $date_heading) {
                 $date_heading = $review_date;
                 echo "<h3>$date_heading</h3>";
@@ -170,13 +169,13 @@ if (isset($_REQUEST['recentactivity'])) {
                 pollvotes.pollid,
                 games.title AS gametitle,
                 games.author AS gameauthor,
-                users.name AS votername,
+                users.name AS votername
         FROM pollvotes
         LEFT JOIN games
             ON pollvotes.gameid = games.id
         LEFT JOIN users
             ON pollvotes.userid = users.id
-        WHERE (pollvotes.votedate) > DATE_SUB(NOW(), INTERVAL 100 DAY)
+        WHERE (pollvotes.votedate) > DATE_SUB(NOW(), INTERVAL 500 DAY)
         ORDER BY pollvotes.votedate DESC
         LIMIT 100');
 // , [$days]    
@@ -191,16 +190,9 @@ if (isset($_REQUEST['recentactivity'])) {
             $quickquote = $r['quickquote'];
             $notes = $r['notes'];
             $game_id = $r['gameid'];
-            $game_title_long = $r['gametitle'];
-            $game_title = substr($game_title_long,0,55);
-            if ($game_title != $game_title_long) {
-                $game_title .= "...";
-            }
-            $game_author_long = $r['gameauthor'];
-            $game_author = substr($game_author_long,0,55);
-            if ($game_author != $game_author_long) {
-                $game_author .= "...";
-            }
+            $game_title = shortenString($r['gametitle']);
+            $game_author = shortenString($r['gameauthor']);
+            $poll_id = $r['pollid'];
             if ($vote_date != $date_heading) {
                 $date_heading = $vote_date;
                 echo "<h3>$date_heading</h3>";
@@ -210,7 +202,7 @@ if (isset($_REQUEST['recentactivity'])) {
             if ($quick_quote || $notes) {
                 echo 'with this comment: "' . $quick_quote . ': ' . $notes . '" ';
             }
-            echo "in the poll <a href='/poll?id={$poll_id}'>$poll_title</a>.";  
+            echo "in the poll <a href='/poll?id={$poll_id}'>$poll_id</a>.";  
         }
     } else {
         echo "<p>No recent poll votes found.</p>";
