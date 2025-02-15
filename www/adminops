@@ -112,8 +112,8 @@ if (isset($_REQUEST['recentactivity'])) {
         ON reviews.gameid = games.id
         LEFT JOIN users
         ON reviews.userid = users.id
-        WHERE (reviews.moddate) > DATE_SUB(NOW(), INTERVAL 100 DAY)
-        ORDER BY reviews.moddate DESC
+        WHERE (reviews.moddate) > DATE_SUB(NOW(), INTERVAL 80 DAY)
+        ORDER BY reviews.moddate
         LIMIT 100');
 // , [$days]
     // Display recent ratings and reviews    
@@ -143,18 +143,23 @@ if (isset($_REQUEST['recentactivity'])) {
             $game_title = shortenString($r['gametitle']);
             $game_author = shortenString($r['gameauthor']);
             if ($review_date != $date_heading) {
+                if ($date_heading != "") {
+                    echo "</ul>";
+                }
                 $date_heading = $review_date;
                 echo "<h3>$date_heading</h3>";
+                echo "<ul>";
             }
-            echo "<p><a href='/showuser?id=$reviewer_id'>$reviewer_name</a> ";
+            echo "<li><a href='/showuser?id=$reviewer_id'>$reviewer_name</a> ";
             if ($action == "added") {
                 echo "added ";
             } else if ($action == "edited") {
                 echo "edited a rating or review, now ";
             }
             echo "a {$rating}-star <a href='/viewgame?id={$game_id}&review={$review_id}'>$rating_or_review</a> ";
-            echo "of <i><a href='/viewgame?id={$game_id}'>$game_title</a></i> by $game_author.";
+            echo "of <i><a href='/viewgame?id={$game_id}'>$game_title</a></i> by $game_author.</li><br>";
         }
+        echo "</ul>";
     } else {
         echo "<p>No recent ratings or reviews found.</p>";
     }
@@ -175,8 +180,8 @@ if (isset($_REQUEST['recentactivity'])) {
             ON pollvotes.gameid = games.id
         LEFT JOIN users
             ON pollvotes.userid = users.id
-        WHERE (pollvotes.votedate) > DATE_SUB(NOW(), INTERVAL 500 DAY)
-        ORDER BY pollvotes.votedate DESC
+        WHERE (pollvotes.votedate) > DATE_SUB(NOW(), INTERVAL 90 DAY)
+        ORDER BY pollvotes.votedate
         LIMIT 100');
 // , [$days]    
     if ($result) {
@@ -194,16 +199,30 @@ if (isset($_REQUEST['recentactivity'])) {
             $game_author = shortenString($r['gameauthor']);
             $poll_id = $r['pollid'];
             if ($vote_date != $date_heading) {
+                if ($date_heading != "") {
+                    echo "</ul>";
+                }
                 $date_heading = $vote_date;
                 echo "<h3>$date_heading</h3>";
+                echo "<ul>";
             }
-            echo "<p><a href='/showuser?id=$voter_id'>$voter_name</a> voted for ";
+            echo "<li><a href='/showuser?id=$voter_id'>$voter_name</a> voted for ";
             echo "<i><a href='/viewgame?id={$game_id}'>$game_title</a></i> by $game_author ";
             if ($quick_quote || $notes) {
-                echo 'with this comment: "' . $quick_quote . ': ' . $notes . '" ';
+                echo 'with the comment "' ;
+                if ($quick_quote) {
+                    echo $quick_quote;
+                    if ($notes) {
+                        echo ": $notes";
+                    }
+                } else {
+                    echo $notes;
+                }
+                echo '" ';
             }
-            echo "in the poll <a href='/poll?id={$poll_id}'>$poll_id</a>.";  
+            echo "in poll <a href='/poll?id={$poll_id}'>$poll_id</a>.</li><br>";  
         }
+        echo "</ul>";
     } else {
         echo "<p>No recent poll votes found.</p>";
     }
