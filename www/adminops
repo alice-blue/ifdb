@@ -226,18 +226,62 @@ if (isset($_REQUEST['recentactivity'])) {
     } else {
         echo "<p>No recent poll votes found.</p>";
     }
-
-
+//    %%%%%%%%%%%%%%%%%
+^^^^^^^^^^^^^^^^^^
+    // Find recent review votes
+    $result = mysqli_execute_query($db, 
+    'SELECT reviewvotes.createdate AS votedatetime,
+        DATE_FORMAT(reviewvotes.create, "%M %e, %Y") AS votedate,
+        reviewvotes.userid as voterid,
+        reviewvotes.vote,
+        reviewvotes.reviewid,
+        reviews.gameid,
+        reviews.userid as reviewerid,
+        users.name AS reviewername
+    FROM reviewvotes
+    LEFT JOIN reviews
+        ON reviewvotes.reviewid = reviews.id
+    LEFT JOIN users
+        ON reviews.userid = users.id
+    WHERE (reviewvotes.createdate) > DATE_SUB(NOW(), INTERVAL 90 DAY)
+    ORDER BY reviewvotes.createdate
+    LIMIT 100');
+// , [$days]
+    // Display recent review votes    
+    if ($result) {
+    $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    echo "<h2>Recent review votes:</h2>";
+    $date_heading = "";
+    foreach ($rows as $r) {
+        $vote_date = $r['votedate'];
+        $voter_id = $r['voterid'];
+        $vote = $r['vote'];
+        $review_id = $r['reviewid'];
+        $reviewer_id = $r['reviewerid'];
+        $reviewer_name = shortenString($r['reviewername']);
+        if ($vote_date != $date_heading) {
+            if ($date_heading != "") {
+                echo "</ul>";
+            }
+            $date_heading = $vote_date;
+            echo "<h3>$date_heading</h3>";
+            echo "<ul>";
+        }
+    echo "<li><a href='/showuser?id={$voter_id}'>User $voter_id</a> ";
+    echo "voted $vote on a ";
+    echo "<a href='/viewgame?id={$game_id}&review={$review_id}'>review</a> ";
+    echo "by $reviewer_name.</li><br>";
+}
+echo "</ul>";
+} else {
+echo "<p>No recent poll votes found.</p>";
+}
+^^^^^^^^^^^^^^
 
 
 //    %%%%%%%%%%%%%%%%%%%%%
 } // if (isset($_REQUEST['recentactivity']))
              
-//            echo "<h1>Unblock tag: ". htmlspecialcharx($tag)."</h1>\n"
-//                ."<p>Unblocked '". htmlspecialcharx($tag) . "'.</p>"
-//                ."<p><a href='/adminops?blocktag'>Block/unblock another tag</a></p>"
-
-
 
        
 //***
