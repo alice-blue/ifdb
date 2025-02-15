@@ -78,14 +78,13 @@ if (isset($_REQUEST['adminemail'])) {
 //***
 if (isset($_REQUEST['recentactivity'])) {
     pageHeader("Recent activity by all users");
-    $days=2; // how many days of activity do we want
+//    $days=3; // how many days of activity do we want
     $result = mysqli_execute_query($db, 
         'SELECT reviews.moddate AS reviewdatetime,
                 CASE WHEN reviews.createdate = reviews.moddate
                      THEN "added"
                      ELSE "edited"
                      END AS action,
-                
                 DATE_FORMAT(reviews.moddate, "%M %e, %Y") AS reviewdate,
                 reviews.userid AS reviewerid,
                 reviews.gameid,
@@ -100,10 +99,10 @@ if (isset($_REQUEST['recentactivity'])) {
         ON reviews.gameid = games.id
         LEFT JOIN users
         ON reviews.userid = users.id
-        WHERE (reviews.moddate) > DATE_SUB(NOW(), INTERVAL $days DAY)
+        WHERE (reviews.moddate) > DATE_SUB(NOW(), INTERVAL 3000 DAY)
         ORDER BY reviews.moddate DESC
         LIMIT 100');
-     
+// , [$days]    
     if ($result) {
         $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
         echo "<h2>Recent ratings and reviews:</h2>";
@@ -119,13 +118,13 @@ if (isset($_REQUEST['recentactivity'])) {
             } else {
                 $rating = "no";
             }
-            $review = false;
-            if ($r['review'] != "") {
-                $review = true;
-            }
+//            $review = false;
+//            if ($r['review'] != "") {
+//                $review = true;
+//            }
             $review_id = $r['reviewid'];
             $rating_or_review = "";
-            if ($review == true) {
+            if ($r['review'] != "") {
                 $rating_or_review = "review";
             } else {
                 $rating_or_review = "rating";
@@ -151,8 +150,8 @@ if (isset($_REQUEST['recentactivity'])) {
             } else if ($action == "edited") {
                 echo "edited a rating or review, now ";
             }
-            echo "a {$rating}-star <a href='/viewgame?id=$game_id&review=$review_id'>$rating_or_review</a> ";
-            echo "of <i><a href='/viewgame?id=$game_id'>$game_title</a></i> by $game_author.";
+            echo "a {$rating}-star <a href='/viewgame?id={$game_id}&review={$review_id}'>$rating_or_review</a> ";
+            echo "of <i><a href='/viewgame?id={$game_id}'>$game_title</a></i> by $game_author.";
         }
     } else {
         echo "No activity found.";
