@@ -79,6 +79,8 @@ if (isset($_REQUEST['adminemail'])) {
 if (isset($_REQUEST['recentactivity'])) {
     pageHeader("Recent activity by all users");
 //    $days=3; // how many days of activity do we want
+
+    // Find recent ratings and reviews
     $result = mysqli_execute_query($db, 
         'SELECT reviews.moddate AS reviewdatetime,
                 CASE WHEN reviews.createdate = reviews.moddate
@@ -99,10 +101,11 @@ if (isset($_REQUEST['recentactivity'])) {
         ON reviews.gameid = games.id
         LEFT JOIN users
         ON reviews.userid = users.id
-        WHERE (reviews.moddate) > DATE_SUB(NOW(), INTERVAL 3000 DAY)
+        WHERE (reviews.moddate) > DATE_SUB(NOW(), INTERVAL 100 DAY)
         ORDER BY reviews.moddate DESC
         LIMIT 100');
-// , [$days]    
+// , [$days]
+    // Display recent ratings and reviews    
     if ($result) {
         $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
         echo "<h2>Recent ratings and reviews:</h2>";
@@ -131,12 +134,12 @@ if (isset($_REQUEST['recentactivity'])) {
             }
             $game_id = $r['gameid'];
             $game_title_long = $r['gametitle'];
-            $game_title = substr($game_title_long,0,60);
+            $game_title = substr($game_title_long,0,55);
             if ($game_title != $game_title_long) {
                 $game_title .= "...";
             }
             $game_author_long = $r['gameauthor'];
-            $game_author = substr($game_author_long,0,60);
+            $game_author = substr($game_author_long,0,55);
             if ($game_author != $game_author_long) {
                 $game_author .= "...";
             }
@@ -154,9 +157,69 @@ if (isset($_REQUEST['recentactivity'])) {
             echo "of <i><a href='/viewgame?id={$game_id}'>$game_title</a></i> by $game_author.";
         }
     } else {
-        echo "No activity found.";
-        echo "<p><a href='/adminops'>Return to the System Maintenance Panel</a></p>";
+        echo "<p>No recent ratings or reviews found.</p>";
     }
+//    %%%%%%%%%%%%%%%%%
+    $result = mysqli_execute_query($db, 
+        'SELECT pollvotes.votedate AS votedatetime,
+                DATE_FORMAT(pollvotes.votedate, "%M %e, %Y") AS votedate,
+                pollvotes.userid as voterid,
+                pollvotes.gameid,
+                pollvotes.quickquote,
+                pollvotes.notes,
+                pollvotes.pollid,
+                games.title AS gametitle,
+                games.author AS gameauthor,
+                users.name AS votername,
+        FROM pollvotes
+        LEFT JOIN games
+            ON pollvotes.gameid = games.id
+        LEFT JOIN users
+            ON pollvotes.userid = users.id
+        WHERE (pollvotes.votedate) > DATE_SUB(NOW(), INTERVAL 100 DAY)
+        ORDER BY pollvotes.votedate DESC
+        LIMIT 100');
+// , [$days]    
+    if ($result) {
+        $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        echo "<h2>Recent poll votes:</h2>";
+        $date_heading = "";
+        foreach ($rows as $r) {
+            $vote_date = $r['votedate'];
+            $voter_id = $r['voterid'];
+            $voter_name = $r['votername'];
+            $quickquote = $r['quickquote'];
+            $notes = $r['notes'];
+            $game_id = $r['gameid'];
+            $game_title_long = $r['gametitle'];
+            $game_title = substr($game_title_long,0,55);
+            if ($game_title != $game_title_long) {
+                $game_title .= "...";
+            }
+            $game_author_long = $r['gameauthor'];
+            $game_author = substr($game_author_long,0,55);
+            if ($game_author != $game_author_long) {
+                $game_author .= "...";
+            }
+            if ($vote_date != $date_heading) {
+                $date_heading = $vote_date;
+                echo "<h3>$date_heading</h3>";
+            }
+            echo "<p><a href='/showuser?id=$voter_id'>$voter_name</a> voted for ";
+            echo "<i><a href='/viewgame?id={$game_id}'>$game_title</a></i> by $game_author ";
+            if ($quick_quote || $notes) {
+                echo 'with this comment: "' . $quick_quote . ': ' . $notes . '" ';
+            }
+            echo "in the poll <a href='/poll?id={$poll_id}'>$poll_title</a>.";  
+        }
+    } else {
+        echo "<p>No recent poll votes found.</p>";
+    }
+
+
+
+
+//    %%%%%%%%%%%%%%%%%%%%%
 } // if (isset($_REQUEST['recentactivity']))
              
 //            echo "<h1>Unblock tag: ". htmlspecialcharx($tag)."</h1>\n"
