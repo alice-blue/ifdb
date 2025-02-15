@@ -164,6 +164,7 @@ if (isset($_REQUEST['recentactivity'])) {
         echo "<p>No recent ratings or reviews found.</p>";
     }
 //    %%%%%%%%%%%%%%%%%
+    // Find recent poll votes
     $result = mysqli_execute_query($db, 
         'SELECT pollvotes.votedate AS votedatetime,
                 DATE_FORMAT(pollvotes.votedate, "%M %e, %Y") AS votedate,
@@ -183,7 +184,8 @@ if (isset($_REQUEST['recentactivity'])) {
         WHERE (pollvotes.votedate) > DATE_SUB(NOW(), INTERVAL 90 DAY)
         ORDER BY pollvotes.votedate
         LIMIT 100');
-// , [$days]    
+// , [$days]
+    // Display recent poll votes
     if ($result) {
         $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
         echo "<h2>Recent poll votes:</h2>";
@@ -227,7 +229,7 @@ if (isset($_REQUEST['recentactivity'])) {
         echo "<p>No recent poll votes found.</p>";
     }
 //    %%%%%%%%%%%%%%%%%
-^^^^^^^^^^^^^^^^^^
+
     // Find recent review votes
     $result = mysqli_execute_query($db, 
     'SELECT reviewvotes.createdate AS votedatetime,
@@ -274,9 +276,55 @@ if (isset($_REQUEST['recentactivity'])) {
 }
 echo "</ul>";
 } else {
-echo "<p>No recent poll votes found.</p>";
+    echo "<p>No recent review votes found.</p>";
 }
-^^^^^^^^^^^^^^
+    // Find recent page edits
+    $result = mysqli_execute_query($db, 
+    'SELECT games_history.moddate AS editdatetime,
+        DATE_FORMAT(games_history.moddate, "%M %e, %Y") AS editdate,
+        games_history.id as gameid,
+        games_history.editedby as editorid,
+        games.title AS gametitle,
+        games.author AS gameauthor,
+        users.name AS editorname
+    FROM games_history
+    LEFT JOIN games
+        ON games_history.id = games.id
+    LEFT JOIN users
+        ON games_history.editedby = users.id
+    WHERE (games_history.moddate) > DATE_SUB(NOW(), INTERVAL 90 DAY)
+    ORDER BY games_history.moddate
+    LIMIT 100');
+// , [$days]    
+    if ($result) {
+    $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    echo "<h2>Recent page edits:</h2>";
+    $date_heading = "";
+    foreach ($rows as $r) {
+        $edit_date = $r['editdate'];
+        $editor_id = $r['editorid'];
+        $editor_name = $r['editorname'];
+        $game_id = $r['gameid'];
+        $game_title = shortenString($r['gametitle']);
+        $game_author = shortenString($r['gameauthor']);
+
+        if ($vote_date != $date_heading) {
+            if ($date_heading != "") {
+                echo "</ul>";
+            }
+            $date_heading = $vote_date;
+            echo "<h3>$date_heading</h3>";
+            echo "<ul>";
+        }
+        echo "<li><a href='/showuser?id=$editor_id'>$editor_name</a> ";
+        echo "edited the page for ";
+        echo "<i><a href='/viewgame?id={$game_id}'>$game_title</a></i> ";
+        echo "by $game_author.</li></br>";
+    }
+    echo "</ul>";
+} else {
+    echo "<p>No recent page edits were found.</p>";
+}
 
 
 //    %%%%%%%%%%%%%%%%%%%%%
