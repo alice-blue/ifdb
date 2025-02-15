@@ -92,8 +92,15 @@ function shortenString($long_string) {
 
 if (isset($_REQUEST['recentactivity'])) {
     pageHeader("Recent activity by all users");
-    $days = 82; // how many days of recent activity to display
-    echo "<h1>Recent activity by all users</h1><br>";
+    $days = 79; // how many days of recent activity to display
+    echo '<h1 id="recent-activity">Recent activity by all users</h1>';
+    echo '<p><a href="#recent-ratings">Ratings and reviews</a> | ';
+    echo '<a href="#recent-review-votes">Review votes</a> | ';
+    echo '<a href="#recent-edits">Page edits</a> | ';
+    echo '<a href="#recent-tags">Tags</a> | ';
+    echo '<a href="#recent-poll-votes">Poll votes</a>';
+    echo "</p><hr>";
+
 
     // Find recent ratings and reviews
     $result = mysqli_execute_query($db, 
@@ -120,9 +127,9 @@ if (isset($_REQUEST['recentactivity'])) {
         ORDER BY reviews.moddate', [$days]);
 
     // Display recent ratings and reviews    
+    echo "<h2 id='recent-ratings'>Recent ratings and reviews:</h2>";
     if ($result) {
         $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
-        echo "<h2>Recent ratings and reviews:</h2>";
         $date_heading = "";
         foreach ($rows as $r) {
             $review_date = $r['reviewdate'];
@@ -166,7 +173,7 @@ if (isset($_REQUEST['recentactivity'])) {
     } else {
         echo "<p>No ratings or reviews found from the past $days days.</p>";
     }
-    echo "<hr>";
+    echo '<a href="#recent-activity">Return to top</a><hr>';
 
 
     // Find recent review helpfulness votes
@@ -189,9 +196,9 @@ if (isset($_REQUEST['recentactivity'])) {
 
 
     // Display recent review helpfulness votes    
+    echo '<h2 id="recent-review-votes">Recent review helpfulness votes:</h2>';
     if ($result) {
         $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
-        echo "<h2>Recent review helpfulness votes:</h2>";
         $date_heading = "";
         foreach ($rows as $r) {
             $vote_date = $r['votedate'];
@@ -217,56 +224,7 @@ if (isset($_REQUEST['recentactivity'])) {
     } else {
         echo "<p>No review helpfulness votes found from the past $days days.</p>";
     }
-    echo "<hr>";
-
-
-    // Find recent tagging activity
-    $result = mysqli_execute_query($db, 
-    'SELECT gametags.moddate AS tagdatetime,
-        DATE_FORMAT(gametags.moddate, "%M %e, %Y") AS tagdate,
-        gametags.gameid,
-        gametags.userid as taggerid,
-        gametags.tag,
-        games.title AS gametitle,
-        games.author AS gameauthor
-      FROM gametags
-      LEFT JOIN games
-          ON gametags.gameid = games.id
-      WHERE (gametags.moddate) > DATE_SUB(NOW(), INTERVAL ? DAY)
-      ORDER BY gametags.moddate', [$days]);
-
-
-    // Display recent tagging activity
-    if ($result) {
-        $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
-        echo "<h2>Recent tagging:</h2>";
-        $date_heading = "";
-        foreach ($rows as $r) {
-            $tag_date = $r['tagdate'];
-            $tagger_id = $r['taggerid'];
-            $tag = $r['tag'];
-            $game_id = $r['gameid'];
-            $game_title = shortenString($r['gametitle']);
-            $game_author = shortenString($r['gameauthor']);
-
-            if ($tag_date != $date_heading) {
-                if ($date_heading != "") {
-                    echo "</ul>";
-                }
-                $date_heading = $tag_date;
-                echo "<h3>$date_heading</h3>";
-                echo "<ul>";
-            }
-            echo "<li>User <a href='/showuser?id=$tagger_id'>$tagger_id</a> ";
-            echo 'added the tag "' . $tag . '" to ';
-            echo "<i><a href='/viewgame?id={$game_id}'>$game_title</a></i> ";
-            echo "by $game_author.</li></br>";
-        }
-        echo "</ul>";
-    } else {
-        echo "<p>No tagging found from the past $days days.</p>";
-    }
-    echo "<hr>";
+    echo '<a href="#recent-activity">Return to top</a><hr>';
 
 
     // Find recent page edits
@@ -289,9 +247,9 @@ if (isset($_REQUEST['recentactivity'])) {
 
 
     // Display recent page edits
+    echo "<h2 id='recent-edits'>Recent page edits:</h2>";
     if ($result) {
         $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
-        echo "<h2>Recent page edits:</h2>";
         $date_heading = "";
         foreach ($rows as $r) {
             $edit_date = $r['editdate'];
@@ -318,8 +276,56 @@ if (isset($_REQUEST['recentactivity'])) {
     } else {
         echo "<p>No page edits found from the past $days days.</p>";
     }
-    echo "<hr>";
+    echo '<a href="#recent-activity">Return to top</a><hr>';
 
+
+    // Find recent tagging activity
+    $result = mysqli_execute_query($db, 
+    'SELECT gametags.moddate AS tagdatetime,
+        DATE_FORMAT(gametags.moddate, "%M %e, %Y") AS tagdate,
+        gametags.gameid,
+        gametags.userid as taggerid,
+        gametags.tag,
+        games.title AS gametitle,
+        games.author AS gameauthor
+      FROM gametags
+      LEFT JOIN games
+          ON gametags.gameid = games.id
+      WHERE (gametags.moddate) > DATE_SUB(NOW(), INTERVAL ? DAY)
+      ORDER BY gametags.moddate', [$days]);
+
+
+    // Display recent tagging activity
+    echo "<h2 id='recent-tags'>Recent tags:</h2>";
+    if ($result) {
+        $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        $date_heading = "";
+        foreach ($rows as $r) {
+            $tag_date = $r['tagdate'];
+            $tagger_id = $r['taggerid'];
+            $tag = $r['tag'];
+            $game_id = $r['gameid'];
+            $game_title = shortenString($r['gametitle']);
+            $game_author = shortenString($r['gameauthor']);
+
+            if ($tag_date != $date_heading) {
+                if ($date_heading != "") {
+                    echo "</ul>";
+                }
+                $date_heading = $tag_date;
+                echo "<h3>$date_heading</h3>";
+                echo "<ul>";
+            }
+            echo "<li>User <a href='/showuser?id=$tagger_id'>$tagger_id</a> ";
+            echo 'added the tag "' . $tag . '" to ';
+            echo "<i><a href='/viewgame?id={$game_id}'>$game_title</a></i> ";
+            echo "by $game_author.</li></br>";
+        }
+        echo "</ul>";
+    } else {
+        echo "<p>No tagging found from the past $days days.</p>";
+    }
+    echo '<a href="#recent-activity">Return to top</a><hr>';
 
 
     // Find recent poll votes
@@ -343,9 +349,9 @@ if (isset($_REQUEST['recentactivity'])) {
         ORDER BY pollvotes.votedate', [$days]);
 
     // Display recent poll votes
+    echo "<h2 id='recent-poll-votes'>Recent poll votes:</h2>";
     if ($result) {
         $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
-        echo "<h2>Recent poll votes:</h2>";
         $date_heading = "";
         foreach ($rows as $r) {
             $vote_date = $r['votedate'];
@@ -385,7 +391,7 @@ if (isset($_REQUEST['recentactivity'])) {
     } else {
         echo "<p>No poll votes found from the past $days days.</p>";
     }
-    echo "<hr>";
+    echo '<a href="#recent-activity">Return to top</a><hr>';
 
 } // if (isset($_REQUEST['recentactivity']))
              
