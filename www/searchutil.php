@@ -286,15 +286,8 @@ function doSearch($db, $term, $searchType, $sortby, $limit, $browse, $count_all_
         $baseWhere = "";
         $groupBy = "";
         $baseOrderBy = "";
-        if ($browse && ($sortby == "" || $sortby == "ratu" || $sortby == "ratd" || $sortby == "rcu")) {
-            // when sorting by highest/lowest/most ratings, we can optimize by
-            // fetching the top N from the gameRatingsView
-            $tableList = "games
-                          join ".getGameRatingsView($db)." on games.id = gameid";
-        } else {
-            $tableList = "games
-                          left join ".getGameRatingsView($db)." on games.id = gameid";
-        }
+        $tableList = "games
+                      join ".getGameRatingsView($db)." on games.id = gameid";
         $matchCols = "title, author, `desc`, tags";
         $likeCol = "title";
         $summaryDesc = "Games";
@@ -346,7 +339,7 @@ function doSearch($db, $term, $searchType, $sortby, $limit, $browse, $count_all_
         // if it's unquoted, check for special prefixes
         if (!$quoted
             && preg_match("/^(-?)([#a-z]+:)/i", $w, $match)
-            && isset($specialMap[$m = $match[2]]))
+            && isset($specialMap[$m = mb_strtolower($match[2])]))
         {
             // set up the new special entry - this is an array with
             // element [0] giving the special descriptor, [1] giving
