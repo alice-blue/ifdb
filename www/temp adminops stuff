@@ -475,40 +475,84 @@ if (isset($_REQUEST['domains'])) {
     $new_admin_note = $_POST['new_admin_note'] ?? null;
     $submit = $_POST['submit'] ?? null;
     pageHeader("Manage Suspicious Domains");
-    echo "<h1>Manage Suspicious Domains</h1>";
     if (!$new_domain || !$new_suspicion_level) {
         ?>
-        <h2>Add or update a suspicious domain<h2>        
+        <h1>Manage Suspicious Domains</h1>
+        <h2>Add or update a suspicious domain<h2>
+        
         <form action="/adminops?domains" method="post">
         <p>Domain: <input id="new_domain" name="new_domain" size=50 required></p>
-        <p>Suspicion level: <input type="number" id="new_suspicion_level" name="new_suspicion_level" min="0" max="3" required></p>
+        <p>Suspicion level: <input type="number" id="new_suspicion_level" name="new_suspicion_level" min="0" max="3" required></p>-
         <p>Admin note: <input type="text" id="new_admin_note" name="new_admin_note" size=50></p>
         <input type="submit" value="Submit"></form></p>
 
     <?php 
+//    } else if ($submit) {
+
     } else {
-        mysqli_execute_query($db, "INSERT into suspicious_domains (domain, suspicion_level, mod_date, modified_by, admin_note) values (?, ?, now(), ?, ?)", [$new_domain, $new_suspicion_level, $userid, $new_admin_note]);
-        echo "$new_domain is now suspicion level $new_suspicion_level.";
-        echo '<p><a href="adminops?domains">Add or update another domain</a></li>';
-    };
-    echo "<hr>";
-    echo "<h2>Levels of suspicion</h2>";
-    echo "<ul>";
-    echo "<li><b>0: None.</b> Remove suspicion from a previously suspicious domain.</li>";
-    echo '<li><b>1: Low.</b> Signups from these domains will include a "suspicious domain" note in the email to moderators.</li>';
-    echo "<li><b>2: Medium.</b> Signups from these domains will be marked as pending review until a moderator approves.</li>";
-    echo "<li><b>3: High.</b> Signups from these domains will be automatically blocked.</li></ul>";
-    echo "</details>";
-    echo "<hr>";
-    // Display the most recent suspicion levels for all the domains in our domain list
-    $result = mysqli_execute_query($db,
-       'SELECT * 
-        FROM suspicious_domains
-        WHERE (domain, mod_date) IN 
-           (SELECT domain, MAX(mod_date)
-            FROM suspicious_domains
-            GROUP BY domain)
-        ORDER by domain');
+//        $result = mysqli_execute_query($db, 'SELECT distinct(id), title from games
+//            join gametags g1 on games.id=g1.gameid
+//            left outer join gametags g2 on games.id=g2.gameid and g2.tag = ?
+//            where g1.tag = ? and g2.tag is null order by title', [$tag2, $tag]);
+//        $rows = mysqli_fetch_all($result, MYSQLI_NUM);
+//        if (!count($rows)) {
+//            echo "<h1>Bulk add tag: ". htmlspecialcharx($tag)."</h1>\n"
+//                ."<p><span class=errmsg>There are no games with the tag \"".htmlspecialcharx($tag)."\" that don't have the tag \"".htmlspecialcharx($tag2)."\".</span></p>"
+//                ."<p><a href='/adminops?bulkaddtag'>Add another</p>";
+//            pageFooter();
+//            exit();
+//        }
+        echo "Hello";
+        $insert = mysqli_execute_query($db, "INSERT into suspicious_domains (domain, suspicion_level, mod_date, modified_by, admin_note) values (?, ?, now(), ?, ?)", [$new_domain, $new_suspicion_level, now(), $userid, $new_admin_note]);
+        echo "bye";
+        //        }
+//        echo "<h1>Bulk add tag: ". htmlspecialcharx($tag2)."</h1>\n"
+//            ."<p>You're about to add the tag \"".htmlspecialcharx($tag2)."\" to ". count($rows) . " game(s) with the tag \"".htmlspecialcharx($tag)."\" that don't already have the tag \"".htmlspecialcharx($tag2)."\":</p>";
+//        global $nonce;
+//        echo "<style nonce='$nonce'>#games { display: grid; grid-template-columns: repeat(auto-fill, 20ch);</style><div id=games>\n";
+//        foreach ($rows as [$tuid, $title]) {
+//            echo "<div><a href='/viewgame?id=$tuid'>".htmlspecialcharx($title)."</a></div>\n";
+        }
+       
+
+      
+
+//    } else {
+//        echo "Got to Else";
+//        $result = mysqli_execute_query($db, 'SELECT distinct(id) from games
+//            join gametags g1 on games.id=g1.gameid
+//            left outer join gametags g2 on games.id=g2.gameid and g2.tag = ?
+//            where g1.tag = ? and g2.tag is null', [$tag2, $tag]);
+//        $tuids = array_merge(...mysqli_fetch_all($result, MYSQLI_NUM));
+//        foreach ($tuids as $tuid) {
+//            mysqli_execute_query($db, "INSERT into gametags (gameid, userid, tag, moddate) values (?, ?, ?, now())", [$tuid, $userid, $tag2]);
+//        }
+//        echo "<h1>Bulk added tag: ". htmlspecialcharx($tag2)."</h1>\n"
+//            ."<p> Added '". htmlspecialcharx($tag2) . "' to ".count($tuids)." game(s).</p>"
+//            ."<p><a href='/adminops?bulkaddtag'>Add another</p>"
+//            ."<p><a href='/adminops'>Return to the System Maintenance Panel</a></p>";
+//    }
+?>
+        <hr>
+        <h2>Levels</h2>
+        <ul>
+        <li><b>0: No suspicion.</b> Assign 0 to remove suspicion from a domain that is marked as suspicious.</li>
+        <li><b>1: Low suspicion.</b> Signups from these domains will include a "suspicious domain" note in the email to moderators.</li>
+        <li><b>2: Medium suspicion.</b> Signups from these domains will be marked as pending review until a moderator approves.</li>
+        <li><b>3: High suspicion.</b> Signups from these domains will be automatically blocked.</li></ul>
+        <hr>
+
+        
+  <?php
+$result = mysqli_execute_query($db,
+    'SELECT * 
+     FROM suspicious_domains
+     WHERE (domain, mod_date) IN 
+          (SELECT domain, MAX(mod_date)
+           FROM suspicious_domains
+           GROUP BY domain
+           )
+     ORDER by domain');
     if (!$result) throw new Exception("Error: " . mysqli_error($db));
     $latest_domain_rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
     echo "<h2>Domains list</h2>";
@@ -516,9 +560,9 @@ if (isset($_REQUEST['domains'])) {
     echo "<tr>";
     echo "<th>Domain</th>";
     echo "<th>Suspicion Level</th>";
-    echo "<th>Date Updated</th>";
-    echo "<th>Updated By</th>";
-    echo "<th>Admin Note</th>";
+    echo "<th>Updated</th>";
+    echo "<th>Updated by</th>";
+    echo "<th>Reason</th>";
     echo "</tr>";
     foreach ($latest_domain_rows as $row) {
         $domain = htmlspecialchars($row['domain']);
@@ -535,8 +579,6 @@ if (isset($_REQUEST['domains'])) {
         echo "</tr>";
     }
     echo "</table>";
-    echo "<hr>";
-    echo '<p><a href="/adminops">Return to the System Maintenance Panel</a></p>';
     pageFooter();
     exit();
 } // if (isset($_REQUEST['domains']))
