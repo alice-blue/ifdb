@@ -468,6 +468,115 @@ if (isset($_REQUEST['recentactivity'])) {
              
 //----------------- end of recent activity -------------
 
+//----------------- BEGIN MANAGE SUSPICIOUS DOMAINS -----------
+if (isset($_REQUEST['domains'])) {
+    $new_domain = $_POST['new_domain'] ?? null;
+    $new_suspicion_level = $_POST['new_suspicion_level'] ?? null;
+//    $confirm = $_POST['confirm'] ?? null;
+    pageHeader("Manage Suspicious Domains");
+    if (!$domain || !$suspicion_level) {
+        ?>
+        <h1>Manage Suspicious Domains</h1>
+        <h2>Add or update a suspicious domain<h2>
+        <p><form method=post>Domain: <input type=hidden name="new suspicious domain" value=''><input id="new_domain" name="new domain" size=50 required></p>
+        <p>Suspicion level: <input type="number" id="new_suspicion_level" name="new suspicion level" min="0" max="3" required></p>
+        <p><form method=post>Reason: <input name=domain_comment size=50></p>
+        <button>Submit</button></form></p>
+        <hr>
+        <h2>Levels</h2>
+        <ul>
+        <li><b>0: No suspicion.</b> Assign 0 to remove suspicion from a domain that is marked as suspicious.</li>
+        <li><b>1: Low suspicion.</b> Signups from these domains will include a "suspicious domain" note in the email to moderators.</li>
+        <li><b>2: Medium suspicion.</b> Signups from these domains will be marked as pending review until a moderator approves.</li>
+        <li><b>3: High suspicion.</b> Signups from these domains will be automatically blocked.</li></ul>
+        <hr>
+    <?php // left off here
+    } else if (!$confirm) {
+        $result = mysqli_execute_query($db, 'SELECT distinct(id), title from games
+            join gametags g1 on games.id=g1.gameid
+            left outer join gametags g2 on games.id=g2.gameid and g2.tag = ?
+            where g1.tag = ? and g2.tag is null order by title', [$tag2, $tag]);
+        $rows = mysqli_fetch_all($result, MYSQLI_NUM);
+        if (!count($rows)) {
+            echo "<h1>Bulk add tag: ". htmlspecialcharx($tag)."</h1>\n"
+                ."<p><span class=errmsg>There are no games with the tag \"".htmlspecialcharx($tag)."\" that don't have the tag \"".htmlspecialcharx($tag2)."\".</span></p>"
+                ."<p><a href='/adminops?bulkaddtag'>Add another</p>";
+            pageFooter();
+            exit();
+        }
+        echo "<h1>Bulk add tag: ". htmlspecialcharx($tag2)."</h1>\n"
+            ."<p>You're about to add the tag \"".htmlspecialcharx($tag2)."\" to ". count($rows) . " game(s) with the tag \"".htmlspecialcharx($tag)."\" that don't already have the tag \"".htmlspecialcharx($tag2)."\":</p>";
+        global $nonce;
+        echo "<style nonce='$nonce'>#games { display: grid; grid-template-columns: repeat(auto-fill, 20ch);</style><div id=games>\n";
+        foreach ($rows as [$tuid, $title]) {
+            echo "<div><a href='/viewgame?id=$tuid'>".htmlspecialcharx($title)."</a></div>\n";
+        }
+        ?>
+        </div>
+        <p><form method=post>
+            <input type=hidden name=bulkaddtag value=''>
+            <input type=hidden name=tag value='<?= htmlspecialcharx($tag); ?>'>
+            <input type=hidden name=tag2 value='<?= htmlspecialcharx($tag2); ?>'>
+            <input type=hidden name=confirm value=1>
+            <button>Confirm Add Tag "<?= htmlspecialcharx($tag2); ?>"</button></form></p>
+        <?php
+    } else {
+        $result = mysqli_execute_query($db, 'SELECT distinct(id) from games
+            join gametags g1 on games.id=g1.gameid
+            left outer join gametags g2 on games.id=g2.gameid and g2.tag = ?
+            where g1.tag = ? and g2.tag is null', [$tag2, $tag]);
+        $tuids = array_merge(...mysqli_fetch_all($result, MYSQLI_NUM));
+        foreach ($tuids as $tuid) {
+            mysqli_execute_query($db, "INSERT into gametags (gameid, userid, tag, moddate) values (?, ?, ?, now())", [$tuid, $userid, $tag2]);
+        }
+        echo "<h1>Bulk added tag: ". htmlspecialcharx($tag2)."</h1>\n"
+            ."<p> Added '". htmlspecialcharx($tag2) . "' to ".count($tuids)." game(s).</p>"
+            ."<p><a href='/adminops?bulkaddtag'>Add another</p>"
+            ."<p><a href='/adminops'>Return to the System Maintenance Panel</a></p>";
+    }
+
+
+$result = mysqli_execute_query($db,
+    'SELECT * 
+     FROM suspicious_domains
+     WHERE (domain, mod_date) IN 
+          (SELECT domain, MAX(mod_date)
+           FROM suspicious_domains
+           GROUP BY domain
+           )
+     ORDER by domain');
+    if (!$result) throw new Exception("Error: " . mysqli_error($db));
+    $latest_domain_rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    echo "<h2>Domains list</h2>";
+    echo "<table>";
+    echo "<tr>";
+    echo "<th>Domain</th>";
+    echo "<th>Suspicion Level</th>";
+    echo "<th>Updated</th>";
+    echo "<th>Updated by</th>";
+    echo "<th>Reason</th>";
+    echo "</tr>";
+    foreach ($latest_domain_rows as $row) {
+        $domain = htmlspecialchars($row['domain']);
+        $suspicion_level = htmlspecialchars($row['suspicion_level']);
+        $mod_date = htmlspecialchars($row['mod_date']);
+        $modified_by = htmlspecialchars($row['modified_by']);
+        $admin_note = htmlspecialchars($row['admin_note']);
+        echo "<tr>";
+        echo "<td>$domain</td>";
+        echo "<td>$suspicion_level</td>";
+        echo "<td>$mod_date</td>";
+        echo "<td>$modified_by</td>";
+        echo "<td>$admin_note</td>";
+        echo "</tr>";
+    }
+    echo "</table>";
+    pageFooter();
+    exit();
+} // if (isset($_REQUEST['domains']))
+
+
+//------------------ end of manage suspicious domains
 
 if (isset($_REQUEST['bulkaddtag'])) {
     $tag = $_POST['tag'] ?? null;
@@ -3236,6 +3345,7 @@ function cleanutf8($str)
     <li><a href="adminops?userSelfComments">User self-comments</a></li>
     <li><a href="adminops?adminemail">Send admin email</a></li>
     <li><a href="adminops?addnews">Add a Site News item</a></li>
+    <li><a href="adminops?domains">Manage suspicious domains</a></li>
     <li><a href="adminops?burygame">Bury game</a></li>
     <li><a href="adminops?duplicateDetector">Duplicate game detector</a></li>
 </ul>
