@@ -20,4 +20,10 @@ values ('gmail.com', '1997-01-01 00:38:54.840', '3', 'Bob', 'I really hate gmail
 insert into suspicious_domains (domain, mod_date, suspicion_level, modified_by, admin_note)
 values ('gmail.com', '2027-12-31 08:38:54.840', '1', 'Amy', 'My latest awesome comment');  
 insert into suspicious_domains (domain, mod_date, suspicion_level, modified_by, admin_note)
-values ('outlook.com', '2020-06-20 02:38:54.840', '2', 'Dave', 'Comment goes here.'); 
+values ('outlook.com', '2020-06-20 02:38:54.840', '1', 'Dave', 'Comment goes here.'); 
+insert into suspicious_domains (domain, mod_date, suspicion_level, modified_by, admin_note)
+values ('yahoo.com', '2029-07-20 02:38:54.840', '2', 'Angela', 'Comment goes here.');
+insert into suspicious_domains (domain, mod_date, suspicion_level, modified_by, admin_note)
+values ('facebook.com', '2006-02-20 02:38:54.840', '2', 'Angela', 'Comment goes here.');
+insert into suspicious_domains (domain, mod_date, suspicion_level, modified_by, admin_note)
+values ('fakedomain.edu', '2010-09-20 02:38:54.840', '3', 'Angela', 'Comment goes here.'); 

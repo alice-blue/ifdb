@@ -496,7 +496,7 @@ if (isset($_REQUEST['domains'])) {
     echo "<ul>";
     echo "<li><b>0: None.</b> Remove suspicion from a previously suspicious domain.</li>";
     echo '<li><b>1: Low.</b> Signups from these domains will include a "suspicious domain" note in the email to moderators.</li>';
-    echo "<li><b>2: Medium.</b> Signups from these domains will be marked as pending review until a moderator approves.</li>";
+    echo "<li><b>2: Medium.</b> Signups from these domains need approval from a moderator before activation.</li>";
     echo "<li><b>3: High.</b> Signups from these domains will be automatically blocked.</li></ul>";
     echo "</details>";
     echo "<hr>";
@@ -516,7 +516,7 @@ if (isset($_REQUEST['domains'])) {
     echo "<tr>";
     echo "<th>Domain</th>";
     echo "<th>Suspicion Level</th>";
-    echo "<th>Date Updated</th>";
+    echo "<th>Last Updated</th>";
     echo "<th>Updated By</th>";
     echo "<th>Admin Note</th>";
     echo "</tr>";
