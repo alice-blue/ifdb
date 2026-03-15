@@ -567,33 +567,36 @@ if (isset($_REQUEST['domains'])) {
     echo "<li><b>3: High.</b> Signups from these domains will be automatically blocked.</li></ul>";
     echo "</details>";
     echo "<hr>";
-    // Display the most recent suspicion levels for all the domains in our domain list
-    echo "<h2>Domains list</h2>";
-    echo "<table>";
-    echo "<tr>";
-    echo "<th>Domain</th>";
-    echo "<th>Suspicion Level</th>";
-    echo "<th>Last Updated</th>";
-    echo "<th>Updated By</th>";
-    echo "<th>Admin Note</th>";
-    echo "</tr>";
-    foreach ($latest_domain_rows as $row) {
-        $domain = htmlspecialchars($row['domain']);
-        $suspicion_level = htmlspecialchars($row['suspicion_level']);
-        $mod_date = htmlspecialchars($row['mod_date']);
-        $modified_by = htmlspecialchars($row['modified_by']);
-        $user_name = htmlspecialchars($row['user_name']);
-        $admin_note = htmlspecialchars($row['admin_note']);
+    // Display the most recent suspicion levels for all the domains in our domain list.
+    // Don't display if we've just submitted the form, because it won't be up to date.
+    if (!$new_domain || !$new_suspicion_level) {
+        echo "<h2>Domains list</h2>";
+        echo "<table>";
         echo "<tr>";
-        echo "<td>$domain</td>";
-        echo "<td>$suspicion_level</td>";
-        echo "<td>$mod_date</td>";
-        echo "<td><a href='/showuser?id=$modified_by'>$user_name</a></td>";
-        echo "<td>$admin_note</td>";
+        echo "<th>Domain</th>";
+        echo "<th>Suspicion Level</th>";
+        echo "<th>Last Updated</th>";
+        echo "<th>Updated By</th>";
+        echo "<th>Admin Note</th>";
         echo "</tr>";
-    }
-    echo "</table>";
-    echo "<hr>";
+        foreach ($latest_domain_rows as $row) {
+            $domain = htmlspecialchars($row['domain']);
+            $suspicion_level = htmlspecialchars($row['suspicion_level']);
+            $mod_date = htmlspecialchars($row['mod_date']);
+            $modified_by = htmlspecialchars($row['modified_by']);
+            $user_name = htmlspecialchars($row['user_name']);
+            $admin_note = htmlspecialchars($row['admin_note']);
+            echo "<tr>";
+            echo "<td>$domain</td>";
+            echo "<td>$suspicion_level</td>";
+            echo "<td>$mod_date</td>";
+            echo "<td><a href='/showuser?id=$modified_by'>$user_name</a></td>";
+            echo "<td>$admin_note</td>";
+            echo "</tr>";
+            }
+        echo "</table>";
+        echo "<hr>";
+    } // if (!$new_domain || !$new_suspicion_level)
     echo '<p><a href="/adminops">Return to the System Maintenance Panel</a></p>';
     pageFooter();
     exit();
