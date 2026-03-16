@@ -25,21 +25,21 @@ DROP TABLE IF EXISTS `suspicious_domains_history`;
 CREATE TABLE `suspicious_domains_history` ( 
   `record_id` INT AUTO_INCREMENT,
   `domain` VARCHAR(255) NOT NULL,
-  `mod_date` DATETIME DEFAULT now(),
+  `mod_date` DATETIME NOT NULL,
   `suspicion_level` VARCHAR(6) NOT NULL,
   `modified_by` varchar(255) NOT NULL,
-  `admin_note` varchar(255) NOT NULL,
+--  `admin_note` varchar(255) NOT NULL,
   PRIMARY KEY (record_id)
 );
 
-insert into `suspicious_domains_history` (domain, mod_date, suspicion_level, modified_by, admin_note)
-values ('gmail.com', '1997-01-01 00:38:54.840', '3', 'kaw2cas7dyiq2tmg', 'My comment.');
-insert into suspicious_domains_history (domain, mod_date, suspicion_level, modified_by, admin_note)
-values ('gmail.com', '2019-12-31 08:38:54.840', '1', '35hnhtx0k51rr9j', 'My latest awesome comment');  
-insert into suspicious_domains_history (domain, mod_date, suspicion_level, modified_by, admin_note)
-values ('outlook.com', '2020-06-20 02:38:54.840', '2', 'kaw2cas7dyiq2tmg', 'Comment goes here.'); 
-insert into suspicious_domains_history (domain, mod_date, suspicion_level, modified_by, admin_note)
-values ('yahoo.com', '2023-07-20 02:38:54.840', '3', '35hnhtx0k51rr9j', 'Comment goes here.');
+insert into `suspicious_domains_history` (domain, mod_date, suspicion_level, modified_by)
+values ('gmail.com', '1997-01-01 00:32:11.840', '3', 'dmmb5sjyxn8x6wf');
+insert into suspicious_domains_history (domain, mod_date, suspicion_level, modified_by)
+values ('gmail.com', '2019-12-31 08:28:59.840', '1', '35hnhtx0k51rr9j');  
+insert into suspicious_domains_history (domain, mod_date, suspicion_level, modified_by)
+values ('outlook.com', '2020-08-15 02:41:54.840', '2', 'dmmb5sjyxn8x6wf'); 
+insert into suspicious_domains_history (domain, mod_date, suspicion_level, modified_by)
+values ('yahoo.com', '2023-07-20 02:02:24.840', '3', '35hnhtx0k51rr9j');
 
 -- insert into suspicious_domains_history (domain, mod_date, suspicion_level, modified_by, admin_note)
 -- values ('facebook.com', '2006-02-20 02:38:54.840', '2', 'kaw2cas7dyiq2tmg', 'Comment goes here.');

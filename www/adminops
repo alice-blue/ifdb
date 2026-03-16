@@ -633,7 +633,7 @@ if (isset($_REQUEST['domains'])) {
             } else {
                 echo "marked <b>$domain</b> as suspicion level <b>$suspicion_level</b>";
             }
-            $formatted_date_time = date('M d, Y, h:i A');
+            $formatted_date_time = date('M d, Y, h:i A', strtotime($mod_date));
             echo " on $formatted_date_time.";
         } // foreach ($suspicious_domain_history_rows as $row)
 
