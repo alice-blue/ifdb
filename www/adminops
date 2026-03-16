@@ -629,9 +629,9 @@ if (isset($_REQUEST['domains'])) {
             $user_name = htmlspecialchars($row['user_name']);
             echo "<li><a href='/showuser?id=$modified_by'>$user_name</a> ";
             if ($suspicion_level == "delete") {
-                echo "deleted $domain from the list of suspicious domains";
+                echo "deleted <b>$domain</b> from the list of suspicious domains";
             } else {
-                echo "marked $domain as suspicion level $suspicion_level";
+                echo "marked <b>$domain</b> as suspicion level <b>$suspicion_level</b>";
             }
             echo " on $mod_date.</li>";
         } // foreach ($suspicious_domain_history_rows as $row)
