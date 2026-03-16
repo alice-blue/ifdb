@@ -511,7 +511,7 @@ if (isset($_REQUEST['domains'])) {
 
             // If the domain is already set to this level, don't set it again.
             if ($suspicion_level == $new_suspicion_level) {
-                echo "The domain $new_domain was already marked as level $suspicion_level. ";
+                echo "The domain <b>$new_domain</b> was already marked as level <b>$suspicion_level</b>. ";
                 echo "No changes were made.";
 
             } else if (($new_suspicion_level == "1") OR ($new_suspicion_level == "2") OR ($new_suspicion_level == "3")) {
@@ -531,8 +531,8 @@ if (isset($_REQUEST['domains'])) {
                     values (?, ?, now(), ?)",
                     [$new_domain, $new_suspicion_level, $userid]); 
 
-                echo "The domain $new_domain_ has been updated ";
-                echo "to suspicion level $new_suspicion_level.";
+                echo "The domain <b>$new_domain</b> has been updated ";
+                echo "to suspicion level <b>$new_suspicion_level</b>.";
 
             } else if ($new_suspicion_level == "delete") {
 
@@ -548,7 +548,7 @@ if (isset($_REQUEST['domains'])) {
                 values (?, ?, now(), ?)",
                 [$new_domain, $new_suspicion_level, $userid]); 
                 
-                echo "The domain $new_domain has been deleted from ";
+                echo "The domain <b>$new_domain</b> has been deleted from ";
                 echo "the list of suspicious domains.";
             } // else if ($new_suspicion_level == "delete")
         } // foreach ($matching_suspicious_domains_rows as $row)
@@ -576,79 +576,57 @@ if (isset($_REQUEST['domains'])) {
                 values (?, ?, now(), ?)",
                 [$new_domain, $new_suspicion_level, $userid]);
 
-                echo "The domain $new_domain has now been added to ";
+                echo "The domain <b>$new_domain</b> has now been added to ";
                 echo "the list of suspicious domains. Its suspicion level ";
-                echo "is $new_suspicion_level.";
+                echo "is <b>$new_suspicion_level</b>.";
             } // else if (($new_suspicion_level == "1") OR ($new_suspicion_level == "2") OR ($new_suspicion_level == "3"))       
         } // if (!$matching_suspicious_domains_rows) 
         echo '<p><a href="adminops?domains">Add or update another domain</a></p>';
     }; // if (!$new_domain || !$new_suspicion_level) 
-    //echo "<hr>";
-   // echo "<h2>Levels of suspicion</h2>";
-   // echo "<ul>";
-   // echo "<li><b>0: None.</b> Remove suspicion from a previously suspicious domain.</li>";
-   // echo '<li><b>1: Low.</b> Signups from these domains will include a "suspicious domain" note in the email to moderators.</li>';
-   // echo "<li><b>2: Medium.</b> Signups from these domains need approval from a moderator before activation.</li>";
-   // echo "<li><b>3: High.</b> Signups from these domains will be automatically blocked.</li></ul>";
-   // echo "</details>";
-    echo "<hr>";
-    // Display the current suspicion levels..
-    // Don't display if we've just submitted the form, because it won't be up to date.
 
     if (!$new_domain || !$new_suspicion_level) { 
+        // The user has not filled out the form.
+        // Display the current list of suspicious domains.
+        echo "<hr>";
         echo "<h2>Current list of suspicious domains</h2>"; 
         echo "<table>";
         echo "<tr>";
         echo "<th>Domain</th>";
         echo "<th>Suspicion Level</th>";
-//        echo "<th>Last Updated</th>";
-//        echo "<th>Updated By</th>";
-//        echo "<th>Admin Note</th>";
         echo "</tr>";
         $result = mysqli_execute_query($db,
        'SELECT domain, suspicion_level
         FROM suspicious_domains
         ORDER by domain');
-    if (!$result) throw new Exception("Error: " . mysqli_error($db));
-    $suspicious_domains_history_rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
- foreach ($suspicious_domains_history_rows as $row) {
+        if (!$result) throw new Exception("Error: " . mysqli_error($db));
+        $suspicious_domains_history_rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        foreach ($suspicious_domains_history_rows as $row) {
             $domain = htmlspecialchars($row['domain']);
             $suspicion_level = htmlspecialchars($row['suspicion_level']);
         echo "<tr>";
         echo "<td>$domain</td>";  
-         echo "<td>$suspicion_level</td>"; 
-         echo "</tr>";    
-         
-         } // foreach ($suspicious_domains_history_rows as $row)
+        echo "<td>$suspicion_level</td>"; 
+        echo "</tr>";    
+        } // foreach ($suspicious_domains_history_rows as $row)
         echo "</table>";
-    // Show the domain history
-    echo "<hr>";
-     echo "<h2>Update history for suspicious domains</h2>";
-     // Collect the suspicious domains history from the database
-    $result = mysqli_execute_query($db,
-       'SELECT s.domain, s.suspicion_level, s.mod_date, s.modified_by, u.id, u.name AS user_name
-        FROM suspicious_domains_history AS s
-        LEFT OUTER JOIN users AS u ON s.modified_by = u.id
-        ORDER by mod_date DESC');
-    if (!$result) throw new Exception("Error: " . mysqli_error($db));
-    $suspicious_domains_history_rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
-//        echo "Edit history for suspicious domains:";
-//        echo "<h2>Domains list</h2>";
-//        echo "<table>";
-//        echo "<tr>";
-//        echo "<th>Domain</th>";
-//        echo "<th>Suspicion Level</th>";
-//        echo "<th>Last Updated</th>";
-//        echo "<th>Updated By</th>";
-//        echo "<th>Admin Note</th>";
-//        echo "</tr>";
+
+        // Show the domain history
+        echo "<hr>";
+        echo "<h2>Update history for suspicious domains</h2>";
+        // Collect the suspicious domains history from the database
+        $result = mysqli_execute_query($db,
+            'SELECT s.domain, s.suspicion_level, s.mod_date, s.modified_by, u.id, u.name AS user_name
+            FROM suspicious_domains_history AS s
+            LEFT OUTER JOIN users AS u ON s.modified_by = u.id
+            ORDER by mod_date DESC');
+            if (!$result) throw new Exception("Error: " . mysqli_error($db));
+        $suspicious_domains_history_rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
         foreach ($suspicious_domains_history_rows as $row) {
             $domain = htmlspecialchars($row['domain']);
             $suspicion_level = htmlspecialchars($row['suspicion_level']);
             $mod_date = htmlspecialchars($row['mod_date']);
             $modified_by = htmlspecialchars($row['modified_by']);
             $user_name = htmlspecialchars($row['user_name']);
-//            $admin_note = htmlspecialchars($row['admin_note']);
             echo "<li><a href='/showuser?id=$modified_by'>$user_name</a> ";
             if ($suspicion_level == "delete") {
                 echo "deleted $domain from the list of suspicious domains";
@@ -657,18 +635,9 @@ if (isset($_REQUEST['domains'])) {
             }
             echo " on $mod_date.</li>";
         } // foreach ($suspicious_domain_history_rows as $row)
-   //         echo "</li>"
-   //         echo "<tr>";
-   //         echo "<td>$domain</td>";
-   //         echo "<td>$suspicion_level</td>";
-   //         echo "<td>$mod_date</td>";
-   //         echo "<td><a href='/showuser?id=$modified_by'>$user_name</a></td>";
-   //         echo "<td>$admin_note</td>";
-   //         echo "</tr>";
-   //         }
-  //      echo "</table>";
-        echo "<hr>";
+
     } // if (!$submit || !$new_domain)
+    echo "<hr>";
     echo '<p><a href="/adminops">Return to the Administrator Operations Panel</a></p>';
     pageFooter();
     exit();
