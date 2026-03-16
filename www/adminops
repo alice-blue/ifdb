@@ -503,7 +503,6 @@ if (isset($_REQUEST['domains'])) {
     echo "<h1>Manage Suspicious Domains</h1>";
    if (!$new_domain || !$new_suspicion_level) {
 //    if (!$submit || !$new_domain || !$new_suspicion_level) {
-        echo "100";
 //    if (!$new_domain || !$new_suspicion_level) {
         // User has not entered all of the form information,
         // so show the form.
@@ -613,9 +612,9 @@ if (isset($_REQUEST['domains'])) {
                 values (?, ?, now(), ?)",
                 [$new_domain, $new_suspicion_level, $userid]);
 
-                echo "The domain $new_domain has been assigned ";
-                echo "suspicion level $new_suspicion_level and ";
-                echo "has been added to the list of suspicious domains.";
+                echo "The domain $new_domain has now been added to ";
+                echo "the list of suspicious domains. Its suspicion level ";
+                echo "is $new_suspicion_level.";
             }        
         }
 
