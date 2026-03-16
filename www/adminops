@@ -496,8 +496,8 @@ if (isset($_REQUEST['domains'])) {
         <input type="submit" value="Submit"></form></p>
 <?php 
     } else {
-        // User has entered a domain and level and clicked "submit."
-        // Check to see if this domain is already in the current list.
+        // User has entered a domain and level. Check to see if this 
+        // domain is already listed in the current suspicious domains.
         $result = mysqli_execute_query($db,
             'SELECT suspicious_domain_id, domain, suspicion_level 
             FROM suspicious_domains
@@ -505,11 +505,11 @@ if (isset($_REQUEST['domains'])) {
         if (!$result) throw new Exception("Error: " . mysqli_error($db)); //not sure about this
         $matching_suspicious_domains_rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
         foreach ($matching_suspicious_domains_rows as $row) {
-            // A matching domain was found in the list of suspicious domains.
+            // A matching domain was found in the current suspicious domains.
             $suspicious_domain_id = htmlspecialchars($row['suspicious_domain_id']);
             $suspicion_level = htmlspecialchars($row['suspicion_level']);
 
-            // If the domain is already set to this level, don't set it again.
+            // If the domain is already set to this suspicion level, don't set it again.
             if ($suspicion_level == $new_suspicion_level) {
                 echo "The domain <b>$new_domain</b> was already marked as level ";
                 echo "<b>$suspicion_level</b>. No changes were made.";
@@ -517,14 +517,14 @@ if (isset($_REQUEST['domains'])) {
             } else if (($new_suspicion_level == "1") OR ($new_suspicion_level == "2") OR ($new_suspicion_level == "3")) {
                 // It's a new suspicion level for this domain.
                 // Update existing row in the suspicious domains table.
-                $integer_new_suspicion_level = (INT)$new_suspicion_level; 
                 mysqli_execute_query($db,
                     'UPDATE suspicious_domains
                     SET suspicion_level = ?
                     WHERE suspicious_domain_id = ?', 
-                    [$integer_new_suspicion_level, $suspicious_domain_id]);
+                    [$new_suspicion_level, $suspicious_domain_id]);
                 
-                // Add a new record to the suspicious domains history table.
+                // Add a new record to the suspicious domains history table
+                // to note that the level was updated.
                 mysqli_execute_query($db, 
                     "INSERT into suspicious_domains_history
                     (domain, suspicion_level, mod_date, modified_by) 
@@ -541,7 +541,8 @@ if (isset($_REQUEST['domains'])) {
                 'DELETE FROM suspicious_domains 
                 WHERE suspicious_domain_id = ?', [$suspicious_domain_id]);
 
-                // Add a new record to the suspicious domains history table
+                // Add a new entry to the suspicious domains history table
+                // to note that this domain was deleted
                 mysqli_execute_query($db, 
                 "INSERT into suspicious_domains_history
                 (domain, suspicion_level, mod_date, modified_by) 
@@ -554,7 +555,7 @@ if (isset($_REQUEST['domains'])) {
         } // foreach ($matching_suspicious_domains_rows as $row)
 
         if (!$matching_suspicious_domains_rows) {
-            // The new domain is not in the current list of suspicious domains.
+            // User has entered a domain that's not in the current list of suspicious domains.
             if ($new_suspicion_level == "delete") {
                 // The user tried to delete a domain that's not on the list.
                 echo "The domain <b>$new_domain</b> was not on the current list of ";
@@ -585,7 +586,7 @@ if (isset($_REQUEST['domains'])) {
     }; // if (!$new_domain || !$new_suspicion_level) 
 
     if (!$new_domain || !$new_suspicion_level) { 
-        // The user has not filled out the form.
+        // The user has not filled out the form, so
         // Display the current list of suspicious domains.
         echo "<hr>";
         echo "<h2>Current list of suspicious domains</h2>"; 
@@ -633,13 +634,12 @@ if (isset($_REQUEST['domains'])) {
             } else {
                 echo "marked <b>$domain</b> as suspicion level <b>$suspicion_level</b>";
             }
- //           $formatted_date_time = date('M d, Y, h:i A', strtotime($mod_date));
             $formatted_date_time = date('M d, Y', strtotime($mod_date));
             echo " on $formatted_date_time.";
         } // foreach ($suspicious_domain_history_rows as $row)
         echo "<hr>";
 
-    } // if (!$submit || !$new_domain)
+    } // if (!$new_domain || !$suspicion_level)
     echo '<p><a href="/adminops">Return to the Administrator Operations Panel</a></p>';
     pageFooter();
     exit();
