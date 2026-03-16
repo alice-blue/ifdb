@@ -26,7 +26,7 @@ CREATE TABLE `suspicious_domains_history` (
   `mod_date` DATETIME NOT NULL,
   `suspicion_level` VARCHAR(6) NOT NULL,
   `modified_by` VARCHAR(255) NOT NULL,
-  PRIMARY KEY (record_id)
+  PRIMARY KEY (suspicious_domains_revision_id)
 );
 
 insert into `suspicious_domains_history` (domain, mod_date, suspicion_level, modified_by)
