@@ -374,7 +374,7 @@ function handlePost()
     $sfsIsSpam = sfsCheck($ip, $email, $dname, $sfsBanned);
 
 
-    // Get the domain of the email address.
+    // Get the domain of the email address
     $email_array  = explode('@', $email, 2);
     $email_domain = $email_array[1];
 
@@ -399,16 +399,11 @@ function handlePost()
     // This doesn't change how we handle the account activation; it simply
     // puts a note in the administrator email notification that this account
     // should be checked more thoroughly.
-//    $emailFlagged = preg_match(
-//       "/@.*\b($low_suspicion_domains)\b/i",
-//        $email);
     $emailFlagged = false;
     if ($email_domain_suspicion_level == "1") {
         $emailFlagged = true;
     }
-        
-
-    
+            
 
 //    $emailFlagged = preg_match(
 //        "/@.*\b(yahoo|ymail|gmail|hotmail|live|aol|gether-back|interlog"
@@ -421,9 +416,6 @@ function handlePost()
     // certain email domains are so popular with spammers that we can just
     // presume this will be a spammer
     $domainBanned = false;
-//    if (preg_match(
-//        "/@.*\b($medium_suspicion_domains)\b/i",
-//        $email))
     if ($email_domain_suspicion_level == "2") {
         $domainBanned = true;
     }
@@ -439,14 +431,9 @@ function handlePost()
 
     // Check for TRULY banned domains.  Certain domains are basically
     // 100% spammers, so we can just ignore them out of hand.
-//    if (preg_match("/@.*\b($high_suspicion_domains)\b/i", $email)
-//        || $ip == "93.75.129.252") // big spam source on 6/21/11
-
 //    if (preg_match("/@.*\b(bigmir)\b/i", $email)
 //        || $ip == "93.75.129.252") // big spam source on 6/21/11
-
-
-        if ($email_domain_suspicion_level == "3") {
+    if ($email_domain_suspicion_level == "3") {
         $errFlagged = "We're sorry, but a problem occurred adding the new "
                       . "user record. Please wait a few minutes and "
                       . "try again, or "
