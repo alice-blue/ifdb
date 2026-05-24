@@ -419,7 +419,7 @@ if ($errMsg) {
                 echo "<table class=grid border=0 cellspacing=0 cellpadding=0>"
                     . "<tr><td>"
                     . "<a href=\"viewgame?id=$gid\">"
-                    . coverArtThumbnail($gid, 80, $pagevsn)
+                    . coverArtThumbnail($gid, 80, $pagevsn, coverArtLinkAltText($title))
                     . "</a></td><td>"
                     . "<a href=\"viewgame?id=$gid\"><b>$title</b></a>, "
                     . "by $author"
