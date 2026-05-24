@@ -2838,7 +2838,8 @@ function check_admin_privileges($db, $userid) {
 // the alt text, announce the game title as the link destination, and then 
 // identify the image. See https://webaim.org/techniques/alttext/#functional
 function coverLinkToViewgameAltText($game_title) {
-    return "$game_title. Cover of $game_title.";
+    $html_game_title = htmlspecialcharx($game_title);
+    return "$html_game_title. Cover of $html_game_title.";
 }
 
 function coverArtThumbnail($id, $size, $version, $alt_text, $params = "") {
