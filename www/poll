@@ -1352,7 +1352,7 @@ function expandVote(id)
                 if ($coverArt) {
                     echo "<td class='poll__artCell'>"
                         . "<a href=\"viewgame?id=$gameID\">"
-                        . coverArtThumbnail($gameID, 80, $pagevsn)
+                        . coverArtThumbnail($gameID, 80, $pagevsn, coverArtLinkAltText($gameTitle))
                         . "</a></td>";
                 } else {
                     echo "<td width='1px'></td>";
