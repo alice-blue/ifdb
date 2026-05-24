@@ -563,7 +563,7 @@ if ($editMode) {
         if ($toArt) {
             echo "<td class='crossrec__artCell'>"
                 . "<a href=\"viewgame?id=$toID\">"
-                . coverArtThumbnail($toID, 80, $toVersion)
+                . coverArtThumbnail($toID, 80, $toVersion, coverArtLinkAltText($toTitle))
                 . "(toArt=$toArt)</a></td>";
         } else {
             echo "<td class='crossrec__emptyCell'></td>";
