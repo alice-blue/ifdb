@@ -935,7 +935,7 @@ if ($hasart) {
            <div class=coverart>
 
               <a href="<?php echo $arthref ?>&ldesc">
-                 <?php echo coverArtThumbnail($id, 175, isset($_REQUEST['version']) ? $_REQUEST['version'] : $pagevsn); ?>
+                 <?php echo coverArtThumbnail($id, 175, isset($_REQUEST['version']) ? $_REQUEST['version'] : $pagevsn, "Large cover. Cover of $title."); ?>
               </a>
            </div>
                <?php
