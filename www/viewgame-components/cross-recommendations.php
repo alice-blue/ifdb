@@ -74,7 +74,7 @@
                         echo "<table class=grid cellspacing=0 cellpadding=0 "
                             . "border=0><tr><td>"
                             . "<a href=\"viewgame?id=$crid\">"
-                            . coverArtThumbnail($crid, 80, $crversion)
+                            . coverArtThumbnail($crid, 80, $crversion, coverArtLinkAltText($crtitle))
                             . "</a></td><td>";
 
                     echo "<a href=\"viewgame?id=$crid\"><b>$crtitle</b></a>"
