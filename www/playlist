@@ -250,7 +250,7 @@ if ($errMsg) {
                 echo "<p><table border=0 cellspacing=0 cellpadding=0>"
                     . "<tr valign=top><td class='playlist__artCell'>"
                     . "<a href=\"viewgame?id=$gameid\">"
-                    . coverArtThumbnail($gameid, 100, $pagevsn)
+                    . coverArtThumbnail($gameid, 100, $pagevsn, coverArtLinkAltText($title))
                     . "</a></td>"
                     . "<td>";
 
