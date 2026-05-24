@@ -40,7 +40,7 @@ for ($idx = 0 ; $idx <= 5 ; $idx++)
                 . "&thumbnail=50x50\"></a>";
         } else if ($r["hasart"]) {
             echo "<a href=\"viewgame?id={$r['gameid']}\">"
-                . coverArtThumbnail($r['gameid'], 50, $r['pagevsn'])
+                . coverArtThumbnail($r['gameid'], 50, $r['pagevsn'], coverArtLinkAltText($r['title']))
                 . "</a>";
         } else {
             // echo "<a href=\"viewgame?id={$r['gameid']}"
