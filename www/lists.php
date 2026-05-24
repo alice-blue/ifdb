@@ -24,7 +24,7 @@ function listMatchItem($match, $num, $showArt, $rating, $hrefTarget)
 
     if ($art)
         echo "<a href=\"viewgame?id=$id\"$hrefTarget class=\"lists__art\">"
-            . coverArtThumbnail($id, 100, $pagevsn)
+            . coverArtThumbnail($id, 100, $pagevsn, coverArtLinkAltText($title))
             . "</a>";
 
     if ($num)
