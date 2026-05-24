@@ -53,7 +53,7 @@ for ($idx = 0 ; $idx <= 5; $idx++)
         if (ENABLE_IMAGES) {
             if ($g["hasart"]) {
                 echo "<a href=\"viewgame?id={$g['id']}\">"
-                    . coverArtThumbnail($g['id'], 50, $g['pagevsn'])
+                    . coverArtThumbnail($g['id'], 50, $g['pagevsn'], coverArtLinkAltText($g['title']))
                     . "</a>";
             } else {
                 // echo "<a href=\"viewgame?id={$g['id']}\">"
@@ -102,7 +102,7 @@ for ($idx = 0 ; $idx <= 5; $idx++)
                     . "&thumbnail=50x50\"></a>";
             } else if ($n["hasart"]) {
                 echo "<a href=\"viewgame?id={$n['gameid']}\">"
-                    . coverArtThumbnail($gid, 50, $n['pagevsn'])
+                    . coverArtThumbnail($gid, 50, $n['pagevsn'],coverArtLinkAltText($gtitle))
                     . "</a>";
             } else {
                 // echo "<a href=\"newslog?newsid=$nid\">"
