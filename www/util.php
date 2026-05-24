@@ -2834,7 +2834,14 @@ function check_admin_privileges($db, $userid) {
 
 }
 
-function coverArtThumbnail($id, $size, $version, $params = "") {
+// For cover art thumbnails on this site that link to the viewgame page. In
+// the alt text, announce the game title as the link destination, and then 
+// identify the image. See https://webaim.org/techniques/alttext/#functional
+function coverLinkToViewgameAltText($game_title) {
+    return "$game_title. Cover of $game_title.";
+}
+
+function coverArtThumbnail($id, $size, $version, $alt_text, $params = "") {
     $thumbnail = "/coverart?id=$id&thumbnail=";
     $x15 = round($size * 3 / 2);
     $x2 = $size * 2;
@@ -2844,7 +2851,7 @@ function coverArtThumbnail($id, $size, $version, $params = "") {
     }
     global $nonce;
     return "<style nonce='$nonce'>.coverart__img { max-width: 35vw; height: auto; }</style>"
-        ."<img class='coverart__img' loading='lazy' srcset=\"$thumbnail{$size}x$size$params, $thumbnail{$x15}x$x15$params 1.5x, $thumbnail{$x2}x$x2$params 2x, $thumbnail{$x3}x$x3$params 3x\" src=\"$thumbnail{$size}x$size$params\" height=$size width=$size border=0 alt=\"\">";
+        ."<img class='coverart__img' loading='lazy' srcset=\"$thumbnail{$size}x$size$params, $thumbnail{$x15}x$x15$params 1.5x, $thumbnail{$x2}x$x2$params 2x, $thumbnail{$x3}x$x3$params 3x\" src=\"$thumbnail{$size}x$size$params\" height=$size width=$size border=0 alt=\"$alt_text\">";
 }
 
 // ----------------------------------------------------------------------------
