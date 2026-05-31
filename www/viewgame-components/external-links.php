@@ -165,7 +165,7 @@ if (count($links) == 0 && $dlnotes == "") {
         
         if ($compPri) {
             echo "<span class=dlzipmain><img src=\"/img/blank.gif\" "
-                . "class=\"zip-contents-arrow\">Contains "
+                . "class=\"zip-contents-arrow\" alt=\"\">Contains "
                 . "<b>$compPri</b></span><br>";
         }
        
