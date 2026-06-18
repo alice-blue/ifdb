@@ -149,13 +149,13 @@ if (count($links) == 0 && $dlnotes == "") {
                     ($fmticon ? "fileformat?geticon=$fmtid" :
                      false));
         if ($iconsrc) {
-            echo "<a href=\"$url\"><img class=\"fileIcon\" src=\"$iconsrc\"></a>";
+            echo "<a href=\"$url\"><img class=\"fileIcon\" src=\"$iconsrc\" title=\"$fmtname File\" alt=\"$linktitle. $fmtname file.\"></a>";
         } else {
             echo "<div class=\"fileIcon\"></div>";
         }
 
         echo "<div class='downloaditem'>
-              <a href=\"$url\"><b>$linktitle</b></a>$zipstar<br>";
+             <a href=\"$url\"><b>$linktitle</b></a>$zipstar<br>";
 
         $unbox_supported = [17, 22, 23, 41];
 
@@ -165,7 +165,7 @@ if (count($links) == 0 && $dlnotes == "") {
         
         if ($compPri) {
             echo "<span class=dlzipmain><img src=\"/img/blank.gif\" "
-                . "class=\"zip-contents-arrow\">Contains "
+                . "class=\"zip-contents-arrow\" alt=\"\">Contains "
                 . "<b>$compPri</b></span><br>";
         }
        
